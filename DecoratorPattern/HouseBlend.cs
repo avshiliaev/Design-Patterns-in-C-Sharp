@@ -1,6 +1,6 @@
 ﻿namespace DecoratorPattern
 {
-    class HouseBlend : Beverage
+    internal class HouseBlend : Beverage
     {
         public HouseBlend()
         {

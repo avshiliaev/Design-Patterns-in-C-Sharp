@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace IteratorPattern
 {
@@ -8,28 +7,11 @@ namespace IteratorPattern
     {
         private readonly Menu[] _items;
         private int _position = -1;
+
         public DinnerMenuEnum(Menu[] items)
         {
             _items = items;
         }
-
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool MoveNext()
-        {
-            _position++;
-            return (_position < _items.Length);
-        }
-
-        public void Reset()
-        {
-            _position = -1;
-        }
-
-        object IEnumerator.Current => Current;
 
         public Menu Current
         {
@@ -44,6 +26,24 @@ namespace IteratorPattern
                     throw new InvalidOperationException();
                 }
             }
+        }
+
+        public bool MoveNext()
+        {
+            _position++;
+            return _position < _items.Length;
+        }
+
+        public void Reset()
+        {
+            _position = -1;
+        }
+
+        object IEnumerator.Current => Current;
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

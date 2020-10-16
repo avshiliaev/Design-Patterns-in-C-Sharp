@@ -4,12 +4,12 @@ namespace StatePattern
 {
     public class SoldState : IState
     {
-        private GumballMachine Machine { get; }
-
         public SoldState(GumballMachine gumballMachine)
         {
             Machine = gumballMachine;
         }
+
+        private GumballMachine Machine { get; }
 
         public void InsertQuarter()
         {
@@ -18,7 +18,7 @@ namespace StatePattern
 
         public void EjectQuarter()
         {
-           Console.WriteLine("Can't eject, already turned the crank");
+            Console.WriteLine("Can't eject, already turned the crank");
         }
 
         public void TurnCrank()

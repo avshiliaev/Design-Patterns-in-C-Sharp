@@ -1,8 +1,8 @@
 ﻿namespace ObserverPattern
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
             var provider = new WeatherSupplier();
             var observer1 = new WeatherMonitor("TP");
@@ -12,8 +12,6 @@
             provider.WeatherConditions(33.5, 0.04, 1.7);
             observer2.Subscribe(provider);
             provider.WeatherConditions(37.5, 0.07, 1.2);
-
-
         }
     }
 }

@@ -4,7 +4,9 @@
     {
         private enum Status
         {
-            Empty, InProgress, Boiled
+            Empty,
+            InProgress,
+            Boiled
         }
     }
 }

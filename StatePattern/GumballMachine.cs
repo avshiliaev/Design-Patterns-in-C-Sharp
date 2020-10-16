@@ -4,15 +4,12 @@ namespace StatePattern
 {
     public class GumballMachine
     {
-        public int Count { get; private set; }
+        public IState HasQuarterState;
+        public IState NoQuarterState;
 
         public IState SoldOutState;
-        public IState NoQuarterState;
-        public IState HasQuarterState;
         public IState SoldState;
         public IState WinnerState;
-
-        public IState State { get; set; }
 
         public GumballMachine(int count)
         {
@@ -22,11 +19,12 @@ namespace StatePattern
             HasQuarterState = new HasQuarterState(this);
             SoldState = new SoldState(this);
             WinnerState = new WinnerState(this);
-            if (Count > 0)
-            {
-                State = NoQuarterState;
-            }
+            if (Count > 0) State = NoQuarterState;
         }
+
+        public int Count { get; private set; }
+
+        public IState State { get; set; }
 
         public void InsertQuarter()
         {

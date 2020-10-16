@@ -2,9 +2,9 @@
 
 namespace DecoratorPattern
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
             Beverage beverage = new Espresso();
             Console.WriteLine(beverage.Description + " $" + beverage.Cost());

@@ -5,8 +5,8 @@ namespace ObserverPattern
 {
     internal class Unsubscriber<TWeather> : IDisposable
     {
-        private readonly List<IObserver<TWeather>> _observers;
         private readonly IObserver<TWeather> _observer;
+        private readonly List<IObserver<TWeather>> _observers;
 
         internal Unsubscriber(List<IObserver<TWeather>> observers, IObserver<TWeather> observer)
         {

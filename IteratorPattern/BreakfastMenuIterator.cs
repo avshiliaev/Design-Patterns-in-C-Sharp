@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 
 namespace IteratorPattern
 {
-    class BreakfastMenuIterator : IEnumerable
+    internal class BreakfastMenuIterator : IEnumerable
     {
         private int _count = 0;
-        private ArrayList _items;
+        private readonly ArrayList _items;
 
         public BreakfastMenuIterator(ArrayList items)
         {

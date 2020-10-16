@@ -2,11 +2,6 @@
 {
     public class Menu
     {
-        public string Name { get; }
-        public string Description { get; }
-        public bool Vegetarian { get; }
-        public double Price { get; }
-
         public Menu(string name, string description, double price, bool vegetarian)
         {
             Name = name;
@@ -14,6 +9,10 @@
             Price = price;
             Vegetarian = vegetarian;
         }
-        
+
+        public string Name { get; }
+        public string Description { get; }
+        public bool Vegetarian { get; }
+        public double Price { get; }
     }
 }

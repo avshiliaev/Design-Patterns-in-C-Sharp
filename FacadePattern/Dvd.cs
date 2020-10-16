@@ -6,6 +6,7 @@
         {
             Movie = name;
         }
+
         public string Movie { get; set; }
     }
 }

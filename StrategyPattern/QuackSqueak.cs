@@ -2,7 +2,7 @@
 
 namespace StrategyPattern
 {
-    class QuackSqueak : IQuackBehaviour
+    internal class QuackSqueak : IQuackBehaviour
     {
         public void Quack()
         {

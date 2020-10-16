@@ -2,23 +2,18 @@
 {
     internal class Duck
     {
-        private IQuackBehaviour _quacker;
         private IFlyBehaviour _flyer;
+        private IQuackBehaviour _quacker;
 
 
-        public IQuackBehaviour Quacker {
-            set
-            {
-                _quacker = value;
-            }
+        public IQuackBehaviour Quacker
+        {
+            set => _quacker = value;
         }
 
         public IFlyBehaviour Flyer
         {
-            set
-            {
-                _flyer = value;
-            }
+            set => _flyer = value;
         }
 
 
@@ -56,7 +51,6 @@
             mallard.Display();
             mallard.Flyer = new FlyWings();
             mallard.Display();
-
         }
     }
 }

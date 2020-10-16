@@ -1,6 +1,6 @@
 ﻿namespace DecoratorPattern
 {
-    abstract class Beverage
+    internal abstract class Beverage
     {
         protected string _description = "No Description";
         public abstract string Description { get; }

@@ -2,7 +2,7 @@
 
 namespace TemplatePattern.Beverages
 {
-    class Coffee : Beverage
+    internal class Coffee : Beverage
     {
         protected override void Brew()
         {
@@ -13,6 +13,5 @@ namespace TemplatePattern.Beverages
         {
             Console.WriteLine("Add Milk and Sugar");
         }
-
     }
 }

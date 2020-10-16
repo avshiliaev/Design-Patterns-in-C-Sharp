@@ -4,12 +4,12 @@ namespace StatePattern
 {
     public class SoldOutState : IState
     {
-        public GumballMachine Machine { get; }
-
         public SoldOutState(GumballMachine gumballMachine)
         {
             Machine = gumballMachine;
         }
+
+        public GumballMachine Machine { get; }
 
         public void InsertQuarter()
         {

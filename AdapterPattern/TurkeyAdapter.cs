@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AdapterPattern
 {
@@ -12,6 +10,7 @@ namespace AdapterPattern
         {
             _turkey = turkey;
         }
+
         public void Quack()
         {
             _turkey.Gobble();

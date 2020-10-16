@@ -1,6 +1,6 @@
 namespace MediatorPattern
 {
-    class ManagerMediator : Mediator
+    internal class ManagerMediator : Mediator
     {
         public Colleague Customer { get; set; }
         public Colleague Programmer { get; set; }
@@ -9,13 +9,9 @@ namespace MediatorPattern
         public override void Send(string message, Colleague colleague)
         {
             if (colleague == Customer)
-            {
                 Programmer.Notify(message);
-            }
             else if (colleague == Programmer)
-            {
                 Tester.Notify(message);
-            }
             else Customer.Notify(message);
         }
     }

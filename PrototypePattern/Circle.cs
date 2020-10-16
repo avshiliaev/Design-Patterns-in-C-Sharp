@@ -2,9 +2,10 @@
 
 namespace PrototypePattern
 {
-    class Circle : IFigure
+    internal class Circle : IFigure
     {
-        readonly int _radius;
+        private readonly int _radius;
+
         public Circle(int r)
         {
             _radius = r;
@@ -14,6 +15,7 @@ namespace PrototypePattern
         {
             return new Circle(_radius);
         }
+
         public void GetInfo()
         {
             Console.WriteLine($"Circle with radius {_radius}");

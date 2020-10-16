@@ -2,9 +2,8 @@ using System;
 
 namespace FlyweightPattern
 {
-    public class OolingMilkTea: IBeverage
+    public class OolingMilkTea : IBeverage
     {
-
         public OolingMilkTea()
         {
             Console.WriteLine("Initializing an Oolong Milk Tea instance");

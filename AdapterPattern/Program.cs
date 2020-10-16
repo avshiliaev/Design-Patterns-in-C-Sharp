@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AdapterPattern
+﻿namespace AdapterPattern
 {
     internal static class Program
     {

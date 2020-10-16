@@ -2,9 +2,11 @@ using System;
 
 namespace MediatorPattern
 {
-    class Customer : Colleague
+    internal class Customer : Colleague
     {
-        public Customer(Mediator mediator) : base(mediator) {}
+        public Customer(Mediator mediator) : base(mediator)
+        {
+        }
 
         public override void Notify(string message)
         {

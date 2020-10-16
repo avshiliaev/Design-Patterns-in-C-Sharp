@@ -1,23 +1,21 @@
 ﻿namespace DecoratorPattern
 {
-    class MochaCondiment : CondimentDecorator
+    internal class MochaCondiment : CondimentDecorator
     {
-        Beverage _beverage;
+        private readonly Beverage _beverage;
 
         public MochaCondiment(Beverage beverage)
         {
-            this._beverage = beverage;
+            _beverage = beverage;
         }
 
-        public override string Description {
-           get
+        public override string Description
+        {
+            get
             {
                 if (_beverage.Description.StartsWith("Mocha"))
-                {
                     return "Double " + _beverage.Description;
-                }
-                else
-                    return "Mocha " + _beverage.Description;
+                return "Mocha " + _beverage.Description;
             }
         }
 

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FacadePattern
 {
@@ -13,6 +9,9 @@ namespace FacadePattern
             Console.WriteLine(val == 10 ? "Turning Lights On" : $"Dimming lights to {val}");
         }
 
-        internal void Off() => Console.WriteLine("Switching off lights");
+        internal void Off()
+        {
+            Console.WriteLine("Switching off lights");
+        }
     }
 }

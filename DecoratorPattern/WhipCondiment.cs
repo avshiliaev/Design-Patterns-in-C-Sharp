@@ -1,24 +1,21 @@
 ﻿namespace DecoratorPattern
 {
-    class WhipCondiment : CondimentDecorator
+    internal class WhipCondiment : CondimentDecorator
     {
-        Beverage _beverage;
+        private readonly Beverage _beverage;
 
         public WhipCondiment(Beverage beverage)
         {
-            this._beverage = beverage;
+            _beverage = beverage;
         }
 
         public override string Description
         {
             get
-            { 
+            {
                 if (_beverage.Description.StartsWith("Whip"))
-                {
                     return "Double " + _beverage.Description;
-                }
-                else
-                    return "Whip " + _beverage.Description;
+                return "Whip " + _beverage.Description;
             }
         }
 

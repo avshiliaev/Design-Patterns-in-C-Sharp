@@ -3,15 +3,9 @@ using System.Collections.Generic;
 
 namespace ObserverPattern
 {
-    class WeatherSupplier : IObservable<Weather>
+    internal class WeatherSupplier : IObservable<Weather>
     {
         private readonly List<IObserver<Weather>> _observers;
-        private List<Weather> Screens { get; }
-
-        private List<Weather> GetScreens()
-        {
-            return Screens;
-        }
 
         public WeatherSupplier()
         {
@@ -19,17 +13,22 @@ namespace ObserverPattern
             Screens = new List<Weather>();
         }
 
+        private List<Weather> Screens { get; }
+
         public IDisposable Subscribe(IObserver<Weather> observer)
         {
             if (!_observers.Contains(observer))
             {
                 _observers.Add(observer);
-                foreach (var item in GetScreens())
-                {
-                    observer.OnNext(item);
-                }
+                foreach (var item in GetScreens()) observer.OnNext(item);
             }
+
             return new Unsubscriber<Weather>(_observers, observer);
+        }
+
+        private List<Weather> GetScreens()
+        {
+            return Screens;
         }
 
         public void WeatherConditions(double temp = 0, double humd = 0, double pres = 0)

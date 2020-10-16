@@ -13,24 +13,6 @@ namespace IteratorPattern
             _items = items;
         }
 
-        public void Dispose()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool MoveNext()
-        {
-            _position++;
-            return (_position < _items.Count);
-        }
-
-        public void Reset()
-        {
-            _position = -1;
-        }
-
-        object IEnumerator.Current => Current;
-
         public Menu Current
         {
             get
@@ -44,6 +26,24 @@ namespace IteratorPattern
                     throw new InvalidOperationException();
                 }
             }
+        }
+
+        public bool MoveNext()
+        {
+            _position++;
+            return _position < _items.Count;
+        }
+
+        public void Reset()
+        {
+            _position = -1;
+        }
+
+        object IEnumerator.Current => Current;
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

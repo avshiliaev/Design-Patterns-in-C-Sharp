@@ -2,8 +2,13 @@
 
 namespace TemplatePattern.Beverages
 {
-    class Tea : Beverage
+    internal class Tea : Beverage
     {
+        public new int AddSugar
+        {
+            set => _sugar = value;
+        }
+
         protected override void Brew()
         {
             Console.WriteLine("Adding tea leaves to water and boil");
@@ -18,11 +23,6 @@ namespace TemplatePattern.Beverages
         private new void Sugar()
         {
             Console.WriteLine($"adding {_sugar} spoons of sugar");
-        }
-
-        public new int AddSugar
-        {
-            set { _sugar = value; }
         }
     }
 }

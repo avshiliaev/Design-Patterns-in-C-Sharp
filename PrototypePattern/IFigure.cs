@@ -2,7 +2,7 @@
 
 namespace PrototypePattern
 {
-    interface IFigure : ICloneable
+    internal interface IFigure : ICloneable
     {
         void GetInfo();
     }

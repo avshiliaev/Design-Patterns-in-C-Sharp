@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdapterPattern
 {
-    class WildTurkey : ITurkey
+    internal class WildTurkey : ITurkey
     {
         public void Gobble()
         {

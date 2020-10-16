@@ -1,6 +1,6 @@
 ﻿namespace DecoratorPattern
 {
-    class Espresso : Beverage
+    internal class Espresso : Beverage
     {
         public Espresso()
         {

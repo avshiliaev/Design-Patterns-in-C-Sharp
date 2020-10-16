@@ -2,10 +2,11 @@
 
 namespace PrototypePattern
 {
-    class Rectangle : IFigure
+    internal class Rectangle : IFigure
     {
-        readonly int _width;
-        readonly int _height;
+        private readonly int _height;
+        private readonly int _width;
+
         public Rectangle(int w, int h)
         {
             _width = w;
@@ -16,6 +17,7 @@ namespace PrototypePattern
         {
             return new Rectangle(_width, _height);
         }
+
         public void GetInfo()
         {
             Console.WriteLine($"Rectangle height {_height} and width {_width}");

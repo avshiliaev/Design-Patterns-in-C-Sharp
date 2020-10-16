@@ -4,9 +4,14 @@ namespace CompositePattern
 {
     public class MenuComponent
     {
+        public virtual string Name { get; }
+        public virtual string Description { get; }
+        public virtual bool Vegetarian { get; }
+        public virtual double Price { get; }
+
         public virtual void Add(MenuComponent component)
         {
-           throw new NotImplementedException(); 
+            throw new NotImplementedException();
         }
 
         public virtual void Remove(MenuComponent component)
@@ -18,11 +23,6 @@ namespace CompositePattern
         {
             throw new NotImplementedException();
         }
-
-        public virtual string Name { get; }
-        public virtual string Description { get; }
-        public virtual bool Vegetarian { get; }
-        public virtual double Price { get; }
 
         public virtual void Print()
         {

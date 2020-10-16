@@ -2,16 +2,16 @@
 
 namespace SingletonPattern
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
             try
             {
                 var chocoEggs = ChocolateBoiler.GetInstance();
                 chocoEggs.Fill();
                 chocoEggs.Boil();
-                chocoEggs.Drain();  
+                chocoEggs.Drain();
             }
             catch (Exception)
             {

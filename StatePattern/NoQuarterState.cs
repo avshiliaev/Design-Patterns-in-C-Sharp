@@ -4,12 +4,13 @@ namespace StatePattern
 {
     public class NoQuarterState : IState
     {
-        public GumballMachine Machine { get; }
-
         public NoQuarterState(GumballMachine machine)
         {
             Machine = machine;
         }
+
+        public GumballMachine Machine { get; }
+
         public void InsertQuarter()
         {
             Console.WriteLine("Inserted a quarter");
@@ -23,7 +24,7 @@ namespace StatePattern
 
         public void TurnCrank()
         {
-           Console.WriteLine("Can't turn crank without a quarter");
+            Console.WriteLine("Can't turn crank without a quarter");
         }
 
         public void Dispense()

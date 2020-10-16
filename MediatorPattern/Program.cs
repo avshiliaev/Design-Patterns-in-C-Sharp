@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace MediatorPattern
+﻿namespace MediatorPattern
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var mediator = new ManagerMediator();
             var customer = new Customer(mediator);

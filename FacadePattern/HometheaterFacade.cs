@@ -2,11 +2,11 @@
 {
     public class HomeTheatreFacade
     {
-        private Dimmer _dimmer;
-        private Dvd _dvd;
-        private DvdPlayer _dvdPlayer;
-        
-        public HomeTheatreFacade(Dimmer dimmer,Dvd dvd, DvdPlayer dvdPlayer)
+        private readonly Dimmer _dimmer;
+        private readonly Dvd _dvd;
+        private readonly DvdPlayer _dvdPlayer;
+
+        public HomeTheatreFacade(Dimmer dimmer, Dvd dvd, DvdPlayer dvdPlayer)
         {
             _dvd = dvd;
             _dimmer = dimmer;

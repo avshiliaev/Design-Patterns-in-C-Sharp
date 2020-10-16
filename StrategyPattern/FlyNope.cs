@@ -2,7 +2,7 @@
 
 namespace StrategyPattern
 {
-    class FlyNope : IFlyBehaviour
+    internal class FlyNope : IFlyBehaviour
     {
         public void Fly()
         {

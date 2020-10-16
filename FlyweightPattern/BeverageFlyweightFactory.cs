@@ -16,7 +16,6 @@ namespace FlyweightPattern
         {
             _beverages.TryGetValue(type, out var beverage);
             if (beverage == null)
-            {
                 switch (type)
                 {
                     case BeverageType.BubbleMilk:
@@ -38,7 +37,6 @@ namespace FlyweightPattern
                     default:
                         throw new ArgumentOutOfRangeException(nameof(type), type, null);
                 }
-            }
 
             return beverage;
         }

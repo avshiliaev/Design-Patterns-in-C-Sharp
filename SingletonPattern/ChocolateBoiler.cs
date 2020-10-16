@@ -4,16 +4,24 @@ namespace SingletonPattern
 {
     internal partial class ChocolateBoiler
     {
-        private static readonly Lazy<ChocolateBoiler> _singleton = new Lazy<ChocolateBoiler>(() => new ChocolateBoiler());
-        
-        public static ChocolateBoiler GetInstance() => _singleton.Value;
-      
+        private static readonly Lazy<ChocolateBoiler> _singleton =
+            new Lazy<ChocolateBoiler>(() => new ChocolateBoiler());
+
         private Status _boiler;
 
         private ChocolateBoiler()
         {
             Console.WriteLine("Starting");
             _boiler = Status.Empty;
+        }
+
+        private bool IsEmpty => _boiler == Status.Empty;
+
+        private bool IsBoiled => _boiler == Status.Boiled;
+
+        public static ChocolateBoiler GetInstance()
+        {
+            return _singleton.Value;
         }
 
         public void Fill()
@@ -36,9 +44,5 @@ namespace SingletonPattern
             Console.WriteLine("Boiling...");
             _boiler = Status.Boiled;
         }
-
-        private bool IsEmpty => (_boiler == Status.Empty);
-
-        private bool IsBoiled => (_boiler == Status.Boiled);
     }
 }

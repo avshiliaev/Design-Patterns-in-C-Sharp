@@ -6,6 +6,11 @@ namespace TemplatePattern.Beverages
     {
         // ReSharper disable once InconsistentNaming
         protected int _sugar;
+
+        public bool WantsCondiments { private get; set; }
+
+        public int AddSugar { get; set; }
+
         public void Prepare()
         {
             Boil();
@@ -13,10 +18,7 @@ namespace TemplatePattern.Beverages
             Pour();
             if (WantsCondiments)
                 AddCondiments();
-
         }
-
-        public bool WantsCondiments { private get; set; }
 
 
         protected abstract void Brew();
@@ -33,8 +35,8 @@ namespace TemplatePattern.Beverages
 
         protected abstract void AddCondiments();
 
-        public int AddSugar { get; set; }
-
-        protected void Sugar() { }
+        protected void Sugar()
+        {
+        }
     }
 }

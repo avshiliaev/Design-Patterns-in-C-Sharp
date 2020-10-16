@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdapterPattern
 {
-    class MallardDuck : IDuck
+    internal class MallardDuck : IDuck
     {
         public void Quack()
         {

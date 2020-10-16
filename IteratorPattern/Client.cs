@@ -5,13 +5,13 @@ namespace IteratorPattern
 {
     public class Client
     {
-        private IEnumerable _breakfast;
-        private IEnumerable _dinner;
+        private readonly IEnumerable _breakfast;
+        private readonly IEnumerable _dinner;
 
         public Client(BreakfastMenu breakfast, DinnerMenu dinner)
         {
-            this._breakfast = breakfast.Items;
-            this._dinner = dinner.Items;
+            _breakfast = breakfast.Items;
+            _dinner = dinner.Items;
         }
 
         public void PrintMenu()
@@ -27,8 +27,7 @@ namespace IteratorPattern
             foreach (var item in iter)
             {
                 var i = (Menu) item;
-                Console.WriteLine($"{i.Name}  Rs. {i.Price} {  (i.Vegetarian ? "*" : "x") } \n {i.Description} ");
-
+                Console.WriteLine($"{i.Name}  Rs. {i.Price} {(i.Vegetarian ? "*" : "x")} \n {i.Description} ");
             }
         }
     }

@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace FlyweightPattern
+﻿namespace FlyweightPattern
 {
-    static class Program
+    internal static class Program
     {
         private static void Main()
         {
