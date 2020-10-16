@@ -6,9 +6,9 @@ namespace Creational.SimpleFactory
     {
         private static void Main()
         {
-            var door = DoorFactory.MakeDoor(80, 30);
-            Console.WriteLine($"Height of Door : {door.GetHeight()}");
-            Console.WriteLine($"Width of Door : {door.GetWidth()}");
+            var db = DataBaseContextFactory.CreateDataBaseContext("localhost", 30);
+            Console.WriteLine($"Connected to : {db.GetConnectionString()}");
+            Console.WriteLine($"With timeout of : {db.GetTimeOut()}");
         }
     }
 }
