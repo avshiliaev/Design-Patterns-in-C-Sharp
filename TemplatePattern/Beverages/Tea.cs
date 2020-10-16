@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TemplatePattern
+namespace TemplatePattern.Beverages
 {
     class Tea : Beverage
     {

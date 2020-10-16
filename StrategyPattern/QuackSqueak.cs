@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ducks
+namespace StrategyPattern
 {
     class QuackSqueak : IQuackBehaviour
     {

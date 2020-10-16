@@ -1,4 +1,4 @@
-﻿namespace FactoryPattern
+﻿namespace FactoryPattern.Abstract_Factory.Ingredients.Intefaces
 {
     public interface ISauce
     {

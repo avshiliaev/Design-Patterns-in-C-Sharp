@@ -1,8 +1,8 @@
-﻿namespace FactoryPattern
+﻿namespace FactoryPattern.Factory_Method
 {
     abstract class PizzaFactory
     {
-        public Pizza Order(string type)
+        public Pizza.Pizza Order(string type)
         {
             var pizza = Create(type);
             pizza.Prepare();
@@ -12,6 +12,6 @@
             return pizza;
         }
 
-        protected abstract Pizza Create(string type);
+        protected abstract Pizza.Pizza Create(string type);
     }
 }

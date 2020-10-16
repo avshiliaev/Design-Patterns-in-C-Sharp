@@ -1,10 +1,13 @@
-﻿namespace FactoryPattern
+﻿using FactoryPattern.Abstract_Factory;
+using FactoryPattern.Pizza;
+
+namespace FactoryPattern.Factory_Method
 {
     class NyPizzaFactory : PizzaFactory
     {
-        protected override Pizza Create(string type)
+        protected override Pizza.Pizza Create(string type)
         {
-            Pizza pizza;
+            Pizza.Pizza pizza;
             IIngredientsFactory ingredients = new NyIngredientsFactory();
 
             if (type.Equals("Cheese"))

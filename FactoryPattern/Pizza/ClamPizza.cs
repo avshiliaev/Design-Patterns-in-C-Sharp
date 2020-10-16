@@ -1,6 +1,7 @@
 ﻿using System;
+using FactoryPattern.Abstract_Factory;
 
-namespace FactoryPattern
+namespace FactoryPattern.Pizza
 {
     class ClamPizza : Pizza
     {

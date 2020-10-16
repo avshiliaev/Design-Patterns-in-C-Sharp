@@ -1,4 +1,4 @@
-﻿namespace Ducks
+﻿namespace StrategyPattern
 {
     internal class Duck
     {

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using FactoryPattern.Abstract_Factory.Ingredients;
+using FactoryPattern.Abstract_Factory.Ingredients.Intefaces;
 
-namespace FactoryPattern
+namespace FactoryPattern.Abstract_Factory
 {
     internal class ChicagoIngredientsFactory : IIngredientsFactory
     {
