@@ -4,7 +4,7 @@ namespace Creational.AbstractFactory
 {
     internal static class Program
     {
-        private static void Main()
+        public static void Main()
         {
             var mongoDbFactory = DataBaseContextAbstractFactory.CreateDataBaseContext(DataBaseType.MongoDb);
             var mongoDbContext = mongoDbFactory.CreateDataBaseContext("localhost", 30);
