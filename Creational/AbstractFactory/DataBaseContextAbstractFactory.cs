@@ -1,4 +1,7 @@
-﻿namespace Creational.AbstractFactory
+﻿using Creational.AbstractFactory.Factories;
+using Creational.AbstractFactory.Interfaces;
+
+namespace Creational.AbstractFactory
 {
     public enum DataBaseType
     {

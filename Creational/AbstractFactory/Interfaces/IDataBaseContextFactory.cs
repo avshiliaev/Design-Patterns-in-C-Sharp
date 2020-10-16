@@ -1,4 +1,4 @@
-﻿namespace Creational.AbstractFactory
+﻿namespace Creational.AbstractFactory.Interfaces
 {
     public interface IDataBaseContextFactory
     {
