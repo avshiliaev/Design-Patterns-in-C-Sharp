@@ -6,11 +6,11 @@ namespace Creational.Builder
     {
         public static void Main()
         {
-            var burger = new BurgerBuilder(4)
-                .AddCheese()
-                .AddPepperoni()
-                .AddLettuce()
-                .AddTomato()
+            var burger = new AppBuilder(4)
+                .AddCors()
+                .AddAuthentication()
+                .AddValidation()
+                .AddGrpc()
                 .Build();
             Console.WriteLine(burger.GetDescription());
         }
