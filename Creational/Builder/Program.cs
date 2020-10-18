@@ -6,13 +6,13 @@ namespace Creational.Builder
     {
         public static void Main()
         {
-            var burger = new AppBuilder(4)
+            var app = new AppBuilder(4)
                 .AddCors()
                 .AddAuthentication()
                 .AddValidation()
                 .AddGrpc()
                 .Build();
-            Console.WriteLine(burger.GetDescription());
+            Console.WriteLine(app.GetDescription());
         }
     }
 }

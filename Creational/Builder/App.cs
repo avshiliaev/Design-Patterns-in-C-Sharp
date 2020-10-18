@@ -5,10 +5,10 @@ namespace Creational.Builder
     internal class App
     {
         private readonly int _apiVersion;
-        private bool _useCors;
-        private bool _useValidation;
         private bool _useAuthentication;
+        private bool _useCors;
         private bool _useGrpc;
+        private bool _useValidation;
 
         public App(AppBuilder builder)
         {
