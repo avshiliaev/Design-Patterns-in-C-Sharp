@@ -2,11 +2,11 @@ using Creational.FactoryMethod.Interfaces;
 
 namespace Creational.FactoryMethod.Products
 {
-    internal class MongoDbConnection : IDataBaseConnection
+    internal class MySqlConnection : IDataBaseConnection
     {
         public string ApplyMigrations()
         {
-            return "{Result of MongoDbConnection}";
+            return "{Result of MySqlConnection}";
         }
     }
 }

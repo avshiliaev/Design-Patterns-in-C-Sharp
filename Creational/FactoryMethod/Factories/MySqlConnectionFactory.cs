@@ -4,11 +4,11 @@ using Creational.FactoryMethod.Products;
 
 namespace Creational.FactoryMethod.Factories
 {
-    internal class MongoDbConnectionFactory : DataBaseConnectionFactory
+    internal class MySqlConnectionFactory : DataBaseConnectionFactory
     {
         public override IDataBaseConnection CreateConnection()
         {
-            return new MongoDbConnection();
+            return new MySqlConnection();
         }
     }
 }
