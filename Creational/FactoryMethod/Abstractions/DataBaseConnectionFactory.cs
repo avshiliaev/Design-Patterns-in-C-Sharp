@@ -4,6 +4,7 @@ namespace Creational.FactoryMethod.Abstractions
 {
     internal abstract class DataBaseConnectionFactory
     {
+        // Factory Method
         public abstract IDataBaseConnection CreateConnection();
 
         public void ConnectAndApplyMigrations()

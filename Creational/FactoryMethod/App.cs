@@ -3,9 +3,9 @@ using Creational.FactoryMethod.Factories;
 
 namespace Creational.FactoryMethod
 {
-    internal class Client
+    internal class App
     {
-        public void Main()
+        public void Run()
         {
             StartApp(new PostgreSqlConnectionFactory());
         }
