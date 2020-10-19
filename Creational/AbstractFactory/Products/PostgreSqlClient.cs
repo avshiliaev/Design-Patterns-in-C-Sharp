@@ -2,9 +2,9 @@
 
 namespace Creational.AbstractFactory.Products
 {
+    // Concrete Products are created by corresponding Concrete Factories.
     internal class PostgreSqlClient : IClient
     {
-        // Concrete Products are created by corresponding Concrete Factories.
         public string Query(string query)
         {
             return $"Sending query with PostgreSqlClient: ({query})";

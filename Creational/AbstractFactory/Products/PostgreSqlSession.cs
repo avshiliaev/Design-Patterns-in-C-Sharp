@@ -2,9 +2,9 @@
 
 namespace Creational.AbstractFactory.Products
 {
+    // Concrete Products are created by corresponding Concrete Factories.
     internal class PostgreSqlSession : ISession
     {
-        // Concrete Products are created by corresponding Concrete Factories.
         public string Connect()
         {
             return "Connection to PostgreSQL.";

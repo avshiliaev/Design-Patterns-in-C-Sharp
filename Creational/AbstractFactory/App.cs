@@ -4,11 +4,11 @@ using Creational.AbstractFactory.Interfaces;
 
 namespace Creational.AbstractFactory
 {
+    // The client code works with factories and products only through abstract
+    // types: IConnectionFactory and IConnection. This lets you pass any
+    // factory or product subclass to the client code without breaking it.
     internal class App
     {
-        // The client code works with factories and products only through abstract
-        // types: IConnectionFactory and IConnection. This lets you pass any
-        // factory or product subclass to the client code without breaking it.
         public void Run()
         {
             // The client code can work with any concrete factory class.

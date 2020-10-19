@@ -1,11 +1,11 @@
 ﻿namespace Creational.AbstractFactory.Interfaces
 {
+    // Here's the the base interface of another product. All products can
+    // interact with each other, but proper interaction is possible only between
+    // products of the same concrete variant.
+    // Product B is able to do its own thing...
     public interface IClient
     {
-        // Here's the the base interface of another product. All products can
-        // interact with each other, but proper interaction is possible only between
-        // products of the same concrete variant.
-        // Product B is able to do its own thing...
         string Query(string query);
 
         // ...but it also can collaborate with the ProductA.
