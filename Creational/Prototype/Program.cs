@@ -1,4 +1,5 @@
 using System;
+using Creational.Prototype.Enums;
 using Creational.Prototype.Managers;
 using Creational.Prototype.Prototypes;
 
@@ -8,25 +9,22 @@ namespace Creational.Prototype
     {
         private static void Main()
         {
-            var colorManager = new ColorManager();
+            var emailManager = new GreetingEmailManager();
 
-            // Initialize with standard colors
-            colorManager["red"] = new Color(255, 0, 0);
-            colorManager["green"] = new Color(0, 255, 0);
-            colorManager["blue"] = new Color(0, 0, 255);
+            // Initialize standard emails
+            emailManager[EmailLanguage.English] = new GreetingEmail(EmailLanguage.English);
+            emailManager[EmailLanguage.German] = new GreetingEmail(EmailLanguage.German);
+            emailManager[EmailLanguage.French] = new GreetingEmail(EmailLanguage.French);
 
-            // User adds personalized colors
-            colorManager["angry"] = new Color(255, 54, 0);
-            colorManager["peace"] = new Color(128, 211, 128);
-            colorManager["flame"] = new Color(211, 34, 20);
+            // Send an email based on the user's language
+            SendGreetingEmail(EmailLanguage.German, ref emailManager);
+        }
 
-            // User clones selected colors
-            var color1 = colorManager["red"].Clone() as Color;
-            var color2 = colorManager["peace"].Clone() as Color;
-            var color3 = colorManager["flame"].Clone() as Color;
-
-            // Wait for user
-            Console.ReadKey();
+        private static void SendGreetingEmail(EmailLanguage language, ref GreetingEmailManager manager)
+        {
+            var email = manager[language].Clone() as GreetingEmail;
+            if (email != null)
+                Console.WriteLine(email.Body);
         }
     }
 }
