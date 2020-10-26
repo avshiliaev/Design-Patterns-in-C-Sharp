@@ -117,7 +117,7 @@ couldn’t depend on them even if you wanted to.
 💍 Singleton
 ------------
 Real world example
-> There can only be one president of a country at a time. The same president has to be brought to action, whenever duty calls. President here is singleton.
+> Ensure that a class has just a single instance. Why would anyone want to control how many instances a class has? The most common reason for this is to control access to some shared resource—for example, a database or a file.
 
 In plain words
 > Ensures that only one object of a particular class is ever created.
@@ -125,35 +125,5 @@ In plain words
 Wikipedia says
 > In software engineering, the singleton pattern is a software design pattern that restricts the instantiation of a class to one object. This is useful when exactly one object is needed to coordinate actions across the system.
 
+Use the Singleton pattern when a class in your program should have just a single instance available to all clients; for example, a single database object shared by different parts of the program.
 Singleton pattern is actually considered an anti-pattern and overuse of it should be avoided. It is not necessarily bad and could have some valid use-cases but should be used with caution because it introduces a global state in your application and change to it in one place could affect in the other areas and it could become pretty difficult to debug. The other bad thing about them is it makes your code tightly coupled plus mocking the singleton could be difficult.
-
-**Programmatic Example**
-
-To create a singleton, make the constructor private, disable cloning, disable extension and create a static variable to house the instance
-```C#
-public class President
-{
-  static President instance;
-  // Private constructor
-  private President()
-  {
-    //Hiding the Constructor
-  }
-
-  // Public constructor
-  public static President GetInstance()
-  {
-    if (instance == null) {
-      instance = new President();
-    }
-    return instance;
-  }
-}
-```
-Then in order to use
-```C#
-President a = President.GetInstance();
-President b = President.GetInstance();
-
-Console.WriteLine(a == b); //Output : true
-```

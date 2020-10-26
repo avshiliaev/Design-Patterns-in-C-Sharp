@@ -8,7 +8,6 @@ namespace Creational.Prototype.Prototypes
     {
         public string Body;
 
-        // Constructor
         public GreetingEmail(EmailLanguage language)
         {
             // Some long initialization logic here:
@@ -18,7 +17,7 @@ namespace Creational.Prototype.Prototypes
         // Create a shallow copy
         public object Clone()
         {
-            return MemberwiseClone() as GreetingEmail ?? throw new Exception("");
+            return MemberwiseClone() as GreetingEmail ?? throw new Exception("Some Valid Exception");
         }
     }
 }
