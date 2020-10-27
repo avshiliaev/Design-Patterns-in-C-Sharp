@@ -1,29 +1,25 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Creational.Builder
 {
-    internal class App
+    // It makes sense to use the Builder pattern only when your products are
+    // quite complex and require extensive configuration.
+    //
+    // Unlike in other creational patterns, different concrete builders can
+    // produce unrelated products. In other words, results of various builders
+    // may not always follow the same interface.
+    public class App
     {
-        private readonly int _apiVersion;
-        private bool _useAuthentication;
-        private bool _useCors;
-        private bool _useGrpc;
-        private bool _useValidation;
+        private readonly List<string> _middlewares = new List<string>();
 
-        public App(AppBuilder builder)
+        public void AddMiddleware(string middleware)
         {
-            _apiVersion = builder.Version;
-            _useCors = builder.Cors;
-            _useAuthentication = builder.Authentication;
-            _useValidation = builder.Validation;
-            _useGrpc = builder.Grpc;
+            _middlewares.Add(middleware);
         }
 
-        public string GetDescription()
+        public string ListMiddlewares()
         {
-            var sb = new StringBuilder();
-            sb.Append($"This is {_apiVersion} version of API. ");
-            return sb.ToString();
+            return string.Join(", ", _middlewares);
         }
     }
 }

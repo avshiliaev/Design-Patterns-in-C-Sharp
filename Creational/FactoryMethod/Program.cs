@@ -1,4 +1,4 @@
-﻿namespace Creational.AbstractFactory
+﻿namespace Creational.FactoryMethod
 {
     internal class Program
     {

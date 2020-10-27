@@ -7,10 +7,10 @@ namespace Creational.Singleton
         public static void Main()
         {
             var connectionString = "localhost";
-            var dbOne = DataBaseConnection.GetInstance(connectionString);
-            var dbTwo = DataBaseConnection.GetInstance(connectionString);
+            var dbConnection = DataBaseConnection.GetInstance(connectionString);
+            var dbConnectionDuplicate = DataBaseConnection.GetInstance(connectionString);
 
-            Console.WriteLine(dbOne == dbTwo); //Output : true
+            Console.WriteLine(dbConnection == dbConnectionDuplicate);
         }
     }
 }
