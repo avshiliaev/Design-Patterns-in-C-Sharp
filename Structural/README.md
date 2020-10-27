@@ -17,89 +17,19 @@ Wikipedia says
 🔌 Adapter
 -------
 Real world example
-> Consider that you have some pictures in your memory card and you need to transfer them to your computer. In order to transfer them you need some kind of adapter that is compatible with your computer ports so that you can attach memory card to your computer. In this case card reader is an adapter.
-> Another example would be the famous power adapter; a three legged plug can't be connected to a two pronged outlet, it needs to use a power adapter that makes it compatible with the two pronged outlet.
-> Yet another example would be a translator translating words spoken by one person to another
+> Imagine that you’re creating a stock market monitoring app. The app downloads the stock data from multiple sources in XML format and then displays nice-looking charts and diagrams for the user.
+> At some point, you decide to improve the app by integrating a smart 3rd-party analytics library. But there’s a catch: the analytics library only works with data in JSON format.
+> You could change the library to work with XML. However, this might break some existing code that relies on the library. And worse, you might not have access to the library’s source code in the first place, making this approach impossible.
 
 In plain words
-> Adapter pattern lets you wrap an otherwise incompatible object in an adapter to make it compatible with another class.
+> An adapter wraps one of the objects to hide the complexity of conversion happening behind the scenes. 
 
 Wikipedia says
 > In software engineering, the adapter pattern is a software design pattern that allows the interface of an existing class to be used as another interface. It is often used to make existing classes work with others without modifying their source code.
 
-**Programmatic Example**
-
-Consider a game where there is a hunter and he hunts lions.
-
-First we have an interface `Lion` that all types of lions have to implement
-
-```C#
-interface ILion
-{
-  void Roar();
-}
-
-class AfricanLion : ILion
-{
-  public void Roar()
-  {
-
-  }
-}
-
-class AsiaLion : ILion
-{
-  public void Roar()
-  {
-
-  }
-}
-```
-And hunter expects any implementation of `Lion` interface to hunt.
-```C#
-class Hunter
-{
-  public void Hunt(ILion lion)
-  {
-
-  }
-}
-```
-
-Now let's say we have to add a `WildDog` in our game so that hunter can hunt that also. But we can't do that directly because dog has a different interface. To make it compatible for our hunter, we will have to create an adapter that is compatible
-
-```C#
-// This needs to be added to the game
-class WildDog
-{
-  public void bark()
-  {
-  }
-}
-
-// Adapter around wild dog to make it compatible with our game
-class WildDogAdapter : ILion
-{
-  private WildDog mDog;
-  public WildDogAdapter(WildDog dog)
-  {
-    this.mDog = dog;
-  }
-  public void Roar()
-  {
-    mDog.bark();
-  }
-}
-```
-And now the `WildDog` can be used in our game using `WildDogAdapter`.
-
-```C#
-var wildDog = new WildDog();
-var wildDogAdapter = new WildDogAdapter(wildDog);
-
-var hunter = new Hunter();
-hunter.Hunt(wildDogAdapter);
-```
+When to use
+> Use the Adapter class when you want to use some existing class, but its interface isn’t compatible with the rest of your code.
+> Use the pattern when you want to reuse several existing subclasses that lack some common functionality that can’t be added to the superclass.
 
 🚡 Bridge
 ------
