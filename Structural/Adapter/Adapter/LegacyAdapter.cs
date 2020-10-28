@@ -3,10 +3,10 @@ using Structural.Adapter.Legacy;
 
 namespace Structural.Adapter.Adapter
 {
+    // The Adapter makes the LegacyClass's interface compatible with the Target's
+    // interface.
     internal class LegacyAdapter : ITarget
     {
-        // The Adapter makes the LegacyClass's interface compatible with the Target's
-        // interface.
         private readonly LegacyClass _legacy;
 
         public LegacyAdapter(LegacyClass legacy)

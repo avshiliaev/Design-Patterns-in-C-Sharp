@@ -34,7 +34,26 @@ When to use
 🚡 Bridge
 ------
 Real world example
-> Consider you have a website with different pages and you are supposed to allow the user to change the theme. What would you do? Create multiple copies of each of the pages for each of the themes or would you just create separate theme and load them based on the user's preferences? Bridge pattern allows you to do the second i.e.
+> Consider you have a website with different pages and you are supposed to allow the user to change the theme. What would you do? Create multiple copies of each of the pages 
+> for each of the themes? Adding new shape types and colors to the hierarchy will grow it exponentially. Or would you just create separate theme and load them based on the 
+> user's preferences? Bridge pattern allows you to do the second i.e.
+> The Bridge pattern attempts to solve this problem by switching from inheritance to the object composition. What this means is that you extract one of the dimensions into 
+> a separate class hierarchy, so that the original classes will reference an object of the new hierarchy, instead of having all of its state and behaviors within one class.
+
+Abstraction and Implementation
+
+> Abstraction (also called interface) is a high-level control layer for some entity. This layer isn’t supposed to do any real work on its own. It should delegate the work to the implementation layer (also called platform).
+> Let’s try to solve this issue with the Bridge pattern. It suggests that we divide the classes into two hierarchies: 
+> * Abstraction: the GUI layer of the app.
+> * Implementation: the operating systems’ APIs.
+>
+> The abstraction object controls the appearance of the app, delegating the actual work to the linked implementation object. Different implementations are interchangeable as long as they follow a common interface, enabling the same GUI to work under Windows and Linux.
+> As a result, you can change the GUI classes without touching the API-related classes. Moreover, adding support for another operating system only requires creating a subclass in the implementation hierarchy.
+
+When to use
+
+> Use the Bridge pattern when you want to divide and organize a monolithic class that has several variants of some functionality (for example, if the class can work with various database servers).
+> Use the pattern when you need to extend a class in several orthogonal (independent) dimensions.
 
 ![With and without the bridge pattern](https://cloud.githubusercontent.com/assets/11269635/23065293/33b7aea0-f515-11e6-983f-98823c9845ee.png)
 
@@ -44,89 +63,6 @@ In Plain Words
 Wikipedia says
 > The bridge pattern is a design pattern used in software engineering that is meant to "decouple an abstraction from its implementation so that the two can vary independently"
 
-**Programmatic Example**
-
-Translating our WebPage example from above. Here we have the `WebPage` hierarchy
-
-```C#
-interface IWebPage
-{
-  string GetContent();
-}
-
-class About : IWebPage
-{
-  protected ITheme theme;
-
-  public About(ITheme theme)
-  {
-    this.theme = theme;
-  }
-
-  public string GetContent()
-  {
-    return $"About page in {theme.GetColor()}";
-  }
-}
-
-class Careers : IWebPage
-{
-  protected ITheme theme;
-
-  public Careers(ITheme theme)
-  {
-    this.theme = theme;
-  }
-
-  public string GetContent()
-  {
-    return $"Careers page in {theme.GetColor()}";
-  }
-}
-```
-And the separate theme hierarchy
-```C#
-
-interface ITheme
-{
-  string GetColor();
-}
-
-class DarkTheme : ITheme
-{
-  public string GetColor()
-  {
-    return "Dark Black";
-  }
-}
-
-class LightTheme : ITheme
-{
-  public string GetColor()
-  {
-    return "Off White";
-  }
-}
-
-class AquaTheme : ITheme
-{
-  public string GetColor()
-  {
-    return "Light blue";
-  }
-}
-```
-And both the hierarchies
-```C#
-var darkTheme = new DarkTheme();
-var lightTheme = new LightTheme();
-
-var about= new About(darkTheme);
-var careers = new Careers(lightTheme);
-
-Console.WriteLine(about.GetContent()); //Output: About page in Dark Black
-Console.WriteLine(careers.GetContent()); //Output: Careers page in Off White
-```
 
 🌿 Composite
 -----------------
