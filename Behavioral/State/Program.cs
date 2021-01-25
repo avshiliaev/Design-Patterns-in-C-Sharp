@@ -9,7 +9,7 @@ namespace Behavioral.State
         private static void Main(string[] args)
         {
             // The client code.
-            var newEvent = new AccountCheckEvent
+            var accountCheckEvent = new AccountCheckEvent
             {
                 Balance = 1.0,
                 Approved = true,
@@ -17,7 +17,7 @@ namespace Behavioral.State
                 Blocked = false
             };
 
-            var context = new AccountContext(new AccountPending(), newEvent);
+            var context = new AccountContext(new AccountPending(), accountCheckEvent);
 
             context.CheckBlocked();
             context.CheckPending();
