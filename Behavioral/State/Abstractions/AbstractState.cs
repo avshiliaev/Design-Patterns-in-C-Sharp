@@ -1,4 +1,5 @@
 using Behavioral.State.Context;
+using Behavioral.State.Interfaces;
 
 namespace Behavioral.State.Abstractions
 {
@@ -6,17 +7,20 @@ namespace Behavioral.State.Abstractions
     // implement and also provides a backreference to the Account object,
     // associated with the State. This backreference can be used by States to
     // transition the Account to another State.
-    internal abstract class AbstractState
+    internal abstract class AbstractState : IAccountModel
     {
-        protected Account Context;
+        protected AccountContext Context;
+        public double Balance { get; set; }
 
-        public void SetAccount(Account context)
+        public void SetAccount(AccountContext context)
         {
             Context = context;
         }
 
-        public abstract void Handle1();
+        public abstract void HandleCheckLicense(IAccountModel accountEvent);
 
-        public abstract void Handle2();
+        public abstract void HandleSaveState();
+
+        public abstract void HandleEmitEvent();
     }
 }

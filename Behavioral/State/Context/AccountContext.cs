@@ -1,17 +1,18 @@
 using System;
 using Behavioral.State.Abstractions;
+using Behavioral.State.Interfaces;
 
 namespace Behavioral.State.Context
 {
     // The Account defines the interface of interest to clients. It also
     // maintains a reference to an instance of a State subclass, which
     // represents the current state of the Account.
-    internal class Account
+    internal class AccountContext
     {
         // A reference to the current state of the Account.
         private AbstractState _state;
 
-        public Account(AbstractState state)
+        public AccountContext(AbstractState state)
         {
             TransitionTo(state);
         }
@@ -19,21 +20,26 @@ namespace Behavioral.State.Context
         // The Account allows changing the State object at runtime.
         public void TransitionTo(AbstractState state)
         {
-            Console.WriteLine($"Account: Transition to {state.GetType().Name}.");
             _state = state;
             _state.SetAccount(this);
         }
 
         // The Account delegates part of its behavior to the current State
         // object.
-        public void Request1()
+        public void CheckLicense(IAccountModel accountEvent)
         {
-            _state.Handle1();
+            _state.HandleCheckLicense(accountEvent);
         }
 
-        public void Request2()
+        public void SaveState()
         {
-            _state.Handle2();
+            _state.HandleSaveState();
         }
+        
+        public void EmitEvent()
+        {
+            _state.HandleEmitEvent();
+        }
+
     }
 }

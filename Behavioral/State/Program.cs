@@ -1,4 +1,5 @@
 using Behavioral.State.Context;
+using Behavioral.State.Events;
 using Behavioral.State.States;
 
 namespace Behavioral.State
@@ -8,9 +9,16 @@ namespace Behavioral.State
         private static void Main(string[] args)
         {
             // The client code.
-            var context = new Account(new AccountBlocked());
-            context.Request1();
-            context.Request2();
+            var newEvent = new AccountCheckEvent
+            {
+                Balance = 1.0
+            };
+
+            var context = new AccountContext(new AccountPending());
+
+            context.CheckLicense(newEvent);
+            context.SaveState();
+            context.EmitEvent();
         }
     }
 }
