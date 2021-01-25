@@ -1,3 +1,4 @@
+using System;
 using Behavioral.State.Abstractions;
 using Behavioral.State.Interfaces;
 
@@ -7,17 +8,21 @@ namespace Behavioral.State.States
     // the Account.
     internal class AccountApproved : AbstractState
     {
-        public override void HandleCheckLicense(IAccountModel accountEvent)
+        public override void HandleCheckBlocked()
         {
+            if (Blocked && !Pending)
+                Context.TransitionTo(new AccountBlocked());
         }
 
-        public override void HandleSaveState()
+        public override void HandleCheckPending()
         {
+            if(Pending)
+                Context.TransitionTo(new AccountPending());
         }
 
-        public override void HandleEmitEvent()
+        public override void HandleProcessState()
         {
-            
+            Console.WriteLine("Handle as approved");
         }
     }
 }

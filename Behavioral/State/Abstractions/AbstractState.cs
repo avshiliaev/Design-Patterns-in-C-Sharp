@@ -11,16 +11,24 @@ namespace Behavioral.State.Abstractions
     {
         protected AccountContext Context;
         public double Balance { get; set; }
+        public bool Approved { get; set; }
+        public bool Pending { get; set; }
+        public bool Blocked { get; set; }
 
         public void SetAccount(AccountContext context)
         {
             Context = context;
+            Balance = context.Balance;
+            Approved = context.Approved;
+            Pending = context.Pending;
+            Blocked = context.Blocked;
         }
 
-        public abstract void HandleCheckLicense(IAccountModel accountEvent);
+        public abstract void HandleCheckBlocked();
 
-        public abstract void HandleSaveState();
+        public abstract void HandleCheckPending();
 
-        public abstract void HandleEmitEvent();
+        public abstract void HandleProcessState();
+
     }
 }

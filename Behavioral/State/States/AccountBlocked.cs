@@ -8,21 +8,20 @@ namespace Behavioral.State.States
     // the Account.
     internal class AccountBlocked : AbstractState
     {
-        public override void HandleCheckLicense(IAccountModel accountEvent)
+        public override void HandleCheckBlocked()
         {
-            Console.WriteLine("ConcreteStateA handles request1.");
-            Console.WriteLine("ConcreteStateA wants to change the state of the context.");
-            Context.TransitionTo(new AccountPending());
+            // Remain in the current state.
         }
 
-        public override void HandleSaveState()
+        public override void HandleCheckPending()
         {
-            Console.WriteLine("AccountBlocked handles request2.");
+            if(Pending)
+                Context.TransitionTo(new AccountPending());
         }
         
-        public override void HandleEmitEvent()
+        public override void HandleProcessState()
         {
-            
+            Console.WriteLine("Handle as blocked");
         }
     }
 }

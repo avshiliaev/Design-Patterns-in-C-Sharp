@@ -11,14 +11,17 @@ namespace Behavioral.State
             // The client code.
             var newEvent = new AccountCheckEvent
             {
-                Balance = 1.0
+                Balance = 1.0,
+                Approved = true,
+                Pending = false,
+                Blocked = false
             };
 
-            var context = new AccountContext(new AccountPending());
+            var context = new AccountContext(new AccountPending(), newEvent);
 
-            context.CheckLicense(newEvent);
-            context.SaveState();
-            context.EmitEvent();
+            context.CheckBlocked();
+            context.CheckPending();
+            context.ProcessState();
         }
     }
 }

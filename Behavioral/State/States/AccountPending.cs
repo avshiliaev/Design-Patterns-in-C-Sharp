@@ -1,5 +1,5 @@
+using System;
 using Behavioral.State.Abstractions;
-using Behavioral.State.Interfaces;
 
 namespace Behavioral.State.States
 {
@@ -7,21 +7,25 @@ namespace Behavioral.State.States
     // the Account.
     internal class AccountPending : AbstractState
     {
-        public override void HandleCheckLicense(IAccountModel accountEvent)
+        public override void HandleCheckBlocked()
         {
-            if(accountEvent.Balance < 0)
+            if (Blocked)
                 Context.TransitionTo(new AccountBlocked());
-            else
-                Context.TransitionTo(new AccountApproved());
+            // Otherwise stay.
         }
 
-        public override void HandleSaveState()
+        public override void HandleCheckPending()
         {
+            if (!Pending && Approved)
+                Context.TransitionTo(new AccountApproved());
+            else if (!Pending && !Approved)
+                Context.TransitionTo(new AccountDenied());
+            // Otherwise stay.
         }
-        
-        public override void HandleEmitEvent()
+
+        public override void HandleProcessState()
         {
-            
+            Console.WriteLine("Handle as pending");
         }
     }
 }
