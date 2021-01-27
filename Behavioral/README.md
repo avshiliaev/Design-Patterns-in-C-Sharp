@@ -21,1038 +21,269 @@ Wikipedia says
 🔗 Chain of Responsibility
 -----------------------
 
-Real world example
-> For example, you have three payment methods (`A`, `B` and `C`) setup in your account; each having a different amount in it. `A` has 100 USD, `B` has 300 USD and `C` having 1000 USD and the preference for payments is chosen as `A` then `B` then `C`. You try to purchase something that is worth 210 USD. Using Chain of Responsibility, first of all account `A` will be checked if it can make the purchase, if yes purchase will be made and the chain will be broken. If not, request will move forward to account `B` checking for amount if yes chain will be broken otherwise the request will keep forwarding till it finds the suitable handler. Here `A`, `B` and `C` are links of the chain and the whole phenomenon is Chain of Responsibility.
+Real world problem
+> Imagine that you’re working on an online ordering system. You want to restrict access to the system so only authenticated users can create orders. Also, users who have administrative permissions must have full access to all orders.
+> The code of the checks, which had already looked like a mess, became more and more bloated as you added each new feature. Changing one check sometimes affected the others. Worst of all, when you tried to reuse the checks to protect other components of the system, you had to duplicate some of the code since those components required some of the checks, but not all of them.
+> The system became very hard to comprehend and expensive to maintain. You struggled with the code for a while, until one day you decided to refactor the whole thing.
+
+Solution
+> Like many other behavioral design patterns, the Chain of Responsibility relies on transforming particular behaviors into stand-alone objects called handlers. In our case, each check should be extracted to its own class with a single method that performs the check. The request, along with its data, is passed to this method as an argument.
+> The pattern suggests that you link these handlers into a chain. Each linked handler has a field for storing a reference to the next handler in the chain. In addition to processing a request, handlers pass the request further along the chain. The request travels along the chain until all handlers have had a chance to process it.
+> Here’s the best part: a handler can decide not to pass the request further down the chain and effectively stop any further processing. 
 
 In plain words
-> It helps building a chain of objects. Request enters from one end and keeps going from object to object till it finds the suitable handler.
+> Chain of Responsibility is a behavioral design pattern that lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain.
 
 Wikipedia says
 > In object-oriented design, the chain-of-responsibility pattern is a design pattern consisting of a source of command objects and a series of processing objects. Each processing object contains logic that defines the types of command objects that it can handle; the rest are passed to the next processing object in the chain.
 
-**Programmatic Example**
-
-Translating our account example above. First of all we have a base account having the logic for chaining the accounts together and some accounts
-
-```C#
-abstract class Account
-{
-  private Account mSuccessor;
-  protected decimal mBalance;
-
-  public void SetNext(Account account)
-  {
-    mSuccessor = account;
-  }
-
-  public void Pay(decimal amountTopay)
-  {
-    if (CanPay(amountTopay))
-    {
-      Console.WriteLine($"Paid {amountTopay:c} using {this.GetType().Name}.");
-    }
-    else if (this.mSuccessor != null)
-    {
-      Console.WriteLine($"Cannot pay using {this.GetType().Name}. Proceeding..");
-      mSuccessor.Pay(amountTopay);
-    }
-    else
-    {
-      throw new Exception("None of the accounts have enough balance");
-    }
-  }
-  private bool CanPay(decimal amount)
-  {
-    return mBalance >= amount;
-  }
-}
-
-class Bank : Account
-{
-  public Bank(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
-
-class Paypal : Account
-{
-  public Paypal(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
-
-class Bitcoin : Account
-{
-  public Bitcoin(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
-```
-
-Now let's prepare the chain using the links defined above (i.e. Bank, Paypal, Bitcoin)
-
-```C#
-// Let's prepare a chain like below
-//      $bank->$paypal->$bitcoin
-//
-// First priority bank
-//      If bank can't pay then paypal
-//      If paypal can't pay then bit coin
-var bank = new Bank(100);          // Bank with balance 100
-var paypal = new Paypal(200);      // Paypal with balance 200
-var bitcoin = new Bitcoin(300);    // Bitcoin with balance 300
-
-bank.SetNext(paypal);
-paypal.SetNext(bitcoin);
-
-// Let's try to pay using the first priority i.e. bank
-bank.Pay(259);
-// Output will be
-// ==============
-// Cannot pay using bank. Proceeding ..
-// Cannot pay using paypal. Proceeding ..:
-// Paid 259 using Bitcoin!
-```
+Wheen to use
+> Use the Chain of Responsibility pattern when your program is expected to process different kinds of requests in various ways, but the exact types of requests and their sequences are unknown beforehand.
+> Use the CoR pattern when the set of handlers and their order are supposed to change at runtime.
 
 👮 Command
 -------
 
-Real world example
-> A generic example would be you ordering food at a restaurant. You (i.e. `Client`) ask the waiter (i.e. `Invoker`) to bring some food (i.e. `Command`) and waiter simply forwards the request to Chef (i.e. `Receiver`) who has the knowledge of what and how to cook.
-> Another example would be you (i.e. `Client`) switching on (i.e. `Command`) the television (i.e. `Receiver`) using a remote control (`Invoker`).
+Real world problem
+> Imagine that you’re working on a new text-editor app. Your current task is to create a toolbar with a bunch of buttons for various operations of the editor. You created a very neat Button class that can be used for buttons on the toolbar, as well as for generic buttons in various dialogs.
+> While all of these buttons look similar, they’re all supposed to do different things. Where would you put the code for the various click handlers of these buttons? The simplest solution is to create tons of subclasses for each place where the button is used. These subclasses would contain the code that would have to be executed on a button click.
+> Before long, you realize that this approach is deeply flawed. First, you have an enormous number of subclasses, and that would be okay if you weren’t risking breaking the code in these subclasses each time you modify the base Button class. Put simply, your GUI code has become awkwardly dependent on the volatile code of the business logic.
+> And here’s the ugliest part. Some operations, such as copying/pasting text, would need to be invoked from multiple places. For example, a user could click a small “Copy” button on the toolbar, or copy something via the context menu, or just hit Ctrl+C on the keyboard.
+
+Solution
+> Good software design is often based on the principle of separation of concerns, which usually results in breaking an app into layers. The most common example: a layer for the graphical user interface and another layer for the business logic. 
+> In the code it might look like this: a GUI object calls a method of a business logic object, passing it some arguments. This process is usually described as one object sending another a request.
+> The Command pattern suggests that GUI objects shouldn’t send these requests directly. Instead, you should extract all of the request details, such as the object being called, the name of the method and the list of arguments into a separate command class with a single method that triggers this request. 
+> Command objects serve as links between various GUI and business logic objects. From now on, the GUI object doesn’t need to know what business logic object will receive the request and how it’ll be processed. The GUI object just triggers the command, which handles all the details.
+> The next step is to make your commands implement the same interface. Usually it has just a single execution method that takes no parameters. This interface lets you use various commands with the same request sender, without coupling it to concrete classes of commands. As a bonus, now you can switch command objects linked to the sender, effectively changing the sender’s behavior at runtime.
+> Since the command execution method doesn’t have any parameters, how would we pass the request details to the receiver? It turns out the command should be either pre-configured with this data, or capable of getting it on its own.
+> As a result, commands become a convenient middle layer that reduces coupling between the GUI and business logic layers.
 
 In plain words
-> Allows you to encapsulate actions in objects. The key idea behind this pattern is to provide the means to decouple client from receiver.
+> Command is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request. This transformation lets you parameterize methods with different requests, delay or queue a request’s execution, and support undoable operations.
 
 Wikipedia says
 > In object-oriented programming, the command pattern is a behavioral design pattern in which an object is used to encapsulate all information needed to perform an action or trigger an event at a later time. This information includes the method name, the object that owns the method and values for the method parameters.
 
-**Programmatic Example**
-
-First of all we have the receiver that has the implementation of every action that could be performed
-```C#
-// Receiver
-class Bulb
-{
-  public void TurnOn()
-  {
-    Console.WriteLine("Bulb has been lit");
-  }
-
-  public void TurnOff()
-  {
-    Console.WriteLine("Darkness!");
-  }
-}
-```
-then we have an interface that each of the commands are going to implement and then we have a set of commands
-```C#
-interface ICommand
-{
-  void Execute();
-  void Undo();
-  void Redo();
-}
-
-// Command
-class TurnOn : ICommand
-{
-  private Bulb mBulb;
-
-  public TurnOn(Bulb bulb)
-  {
-    mBulb = bulb ?? throw new ArgumentNullException("Bulb", "Bulb cannot be null");
-  }
-
-  public void Execute()
-  {
-    mBulb.TurnOn();
-  }
-
-  public void Undo()
-  {
-    mBulb.TurnOff();
-  }
-
-  public void Redo()
-  {
-    Execute();
-  }
-}
-
-class TurnOff : ICommand
-{
-  private Bulb mBulb;
-
-  public TurnOff(Bulb bulb)
-  {
-    mBulb = bulb ?? throw new ArgumentNullException("Bulb", "Bulb cannot be null");
-  }
-
-  public void Execute()
-  {
-    mBulb.TurnOff();
-  }
-
-  public void Undo()
-  {
-    mBulb.TurnOn();
-  }
-
-  public void Redo()
-  {
-    Execute();
-  }
-}
-```
-Then we have an `Invoker` with whom the client will interact to process any commands
-```C#
-// Invoker
-class RemoteControl
-{
-  public void Submit(ICommand command)
-  {
-    command.Execute();
-  }
-}
-```
-Finally let's see how we can use it in our client
-```C#
-  var bulb = new Bulb();
-
-  var turnOn = new TurnOn(bulb);
-  var turnOff = new TurnOff(bulb);
-
-  var remote = new RemoteControl();
-  remote.Submit(turnOn); // Bulb has been lit!
-  remote.Submit(turnOff); // Darkness!
-
-  Console.ReadLine();
-```
-
-Command pattern can also be used to implement a transaction based system. Where you keep maintaining the history of commands as soon as you execute them. If the final command is successfully executed, all good otherwise just iterate through the history and keep executing the `undo` on all the executed commands.
+When to use
+> Use the Command pattern when you want to parametrize objects with operations.
+> Use the Command pattern when you want to queue operations, schedule their execution, or execute them remotely.
+> Use the Command pattern when you want to implement reversible operations.
 
 ➿ Iterator
 --------
 
-Real world example
-> An old radio set will be a good example of iterator, where user could start at some channel and then use next or previous buttons to go through the respective channels. Or take an example of MP3 player or a TV set where you could press the next and previous buttons to go through the consecutive channels or in other words they all provide an interface to iterate through the respective channels, songs or radio stations.
+Real world problem
+> Collections are one of the most used data types in programming. Nonetheless, a collection is just a container for a group of objects.
+> Most collections store their elements in simple lists. However, some of them are based on stacks, trees, graphs and other complex data structures.
+> But no matter how a collection is structured, it must provide some way of accessing its elements so that other code can use these elements. There should be a way to go through each element of the collection without accessing the same elements over and over.
+> Adding more and more traversal algorithms to the collection gradually blurs its primary responsibility, which is efficient data storage. Additionally, some algorithms might be tailored for a specific application, so including them into a generic collection class would be weird.
+> On the other hand, the client code that’s supposed to work with various collections may not even care how they store their elements. However, since collections all provide different ways of accessing their elements, you have no option other than to couple your code to the specific collection classes.
+
+Solution
+> The main idea of the Iterator pattern is to extract the traversal behavior of a collection into a separate object called an iterator.
+> In addition to implementing the algorithm itself, an iterator object encapsulates all of the traversal details, such as the current position and how many elements are left till the end. Because of this, several iterators can go through the same collection at the same time, independently of each other.
+> Usually, iterators provide one primary method for fetching elements of the collection. The client can keep running this method until it doesn’t return anything, which means that the iterator has traversed all of the elements.
+> All iterators must implement the same interface. This makes the client code compatible with any collection type or any traversal algorithm as long as there’s a proper iterator. If you need a special way to traverse a collection, you just create a new iterator class, without having to change the collection or the client.
 
 In plain words
-> It presents a way to access the elements of an object without exposing the underlying presentation.
+> Iterator is a behavioral design pattern that lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 
 Wikipedia says
 > In object-oriented programming, the iterator pattern is a design pattern in which an iterator is used to traverse a container and access the container's elements. The iterator pattern decouples algorithms from containers; in some cases, algorithms are necessarily container-specific and thus cannot be decoupled.
 
-**Programmatic example**
+When to use
 
-In C# it can be done by implementing IEnumerable<T>. Translating our radio statiIons example from above. First of all we have `RadioStation`
-
-```C#
-class RadioStation
-{
-  private float mFrequency;
-
-  public RadioStation(float frequency)
-  {
-    mFrequency = frequency;
-  }
-
-  public float GetFrequecy()
-  {
-    return mFrequency;
-  }
-
-}
-
-```
-Then we have our iterator
-
-```C#
-class StationList : IEnumerable<RadioStation>
-{
-  List<RadioStation> mStations = new List<RadioStation>();
-
-  public RadioStation this[int index]
-  {
-    get { return mStations[index]; }
-    set { mStations.Insert(index, value); }
-  }
-
-  public void Add(RadioStation station)
-  {
-    mStations.Add(station);
-  }
-
-  public void Remove(RadioStation station)
-  {
-    mStations.Remove(station);
-  }
-
-  public IEnumerator<RadioStation> GetEnumerator()
-  {
-    return this.GetEnumerator();
-  }
-
-  IEnumerator IEnumerable.GetEnumerator()
-  {
-    //Use can switch to this internal collection if you do not want to transform
-    //return mStations.GetEnumerator();
-
-    //use this if you want to transform the object before rendering
-    foreach (var x in mStations)
-    {
-      yield return x;
-    }
-  }
-}
-```
-And then it can be used as
-```C#
-var stations = new StationList();
-var station1 = new RadioStation(89);
-stations.Add(station1);
-
-var station2 = new RadioStation(101);
-stations.Add(station2);
-
-var station3 = new RadioStation(102);
-stations.Add(station3);
-
-foreach(var x in stations)
-{
-  Console.Write(x.GetFrequecy());
-}
-
-var q = stations.Where(x => x.GetFrequecy() == 89).FirstOrDefault();
-Console.WriteLine(q.GetFrequecy());
-
-Console.ReadLine();
-```
+> Use the Iterator pattern when your collection has a complex data structure under the hood, but you want to hide its complexity from clients (either for convenience or security reasons).
+> Use the pattern to reduce duplication of the traversal code across your app.
+> Use the Iterator when you want your code to be able to traverse different data structures or when types of these structures are unknown beforehand.
 
 👽 Mediator
 ========
 
-Real world example
-> A general example would be when you talk to someone on your mobile phone, there is a network provider sitting between you and them and your conversation goes through it instead of being directly sent. In this case network provider is mediator.
+Real world problem
+> Say you have a dialog for creating and editing customer profiles. It consists of various form controls such as text fields, checkboxes, buttons, etc.
+> Some of the form elements may interact with others. For instance, selecting the “I have a dog” checkbox may reveal a hidden text field for entering the dog’s name. Another example is the submit button that has to validate values of all fields before saving the data.
+> By having this logic implemented directly inside the code of the form elements you make these elements’ classes much harder to reuse in other forms of the app. For example, you won’t be able to use that checkbox class inside another form, because it’s coupled to the dog’s text field. You can use either all the classes involved in rendering the profile form, or none at all.
+
+Solution
+> The Mediator pattern suggests that you should cease all direct communication between the components which you want to make independent of each other. Instead, these components must collaborate indirectly, by calling a special mediator object that redirects the calls to appropriate components. As a result, the components depend only on a single mediator class instead of being coupled to dozens of their colleagues.
 
 In plain words
-> Mediator pattern adds a third party object (called mediator) to control the interaction between two objects (called colleagues). It helps reduce the coupling between the classes communicating with each other. Because now they don't need to have the knowledge of each other's implementation.
+> Mediator is a behavioral design pattern that lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object.
 
 Wikipedia says
 > In software engineering, the mediator pattern defines an object that encapsulates how a set of objects interact. This pattern is considered to be a behavioral pattern due to the way it can alter the program's running behavior.
 
-**Programmatic Example**
+When to use
 
-Here is the simplest example of a chat room (i.e. mediator) with users (i.e. colleagues) sending messages to each other.
-
-First of all, we have the mediator i.e. the chat room
-
-```C#
-interface IChatRoomMediator
-{
-  void ShowMessage(User user, string message);
-}
-
-//Mediator
-class ChatRoom : IChatRoomMediator
-{
-  public void ShowMessage(User user, string message)
-  {
-    Console.WriteLine($"{DateTime.Now.ToString("MMMM dd, H:mm")} [{user.GetName()}]:{message}");
-  }
-}
-```
-
-Then we have our users i.e. colleagues
-```C#
-class User
-{
-  private string mName;
-  private IChatRoomMediator mChatRoom;
-
-  public User(string name, IChatRoomMediator chatroom)
-  {
-    mChatRoom = chatroom;
-    mName = name;
-  }
-
-  public string GetName()
-  {
-    return mName;
-  }
-
-  public void Send(string message)
-  {
-    mChatRoom.ShowMessage(this, message);
-  }
-}
-```
-And the usage
-```C#
-var mediator = new ChatRoom();
-
-var john = new User("John", mediator);
-var jane = new User("Jane", mediator);
-
-john.Send("Hi there!");
-jane.Send("Hey!");
-
-//April 14, 20:05[John]:Hi there!
-//April 14, 20:05[Jane]:Hey!
-```
+> Use the Mediator pattern when it’s hard to change some of the classes because they are tightly coupled to a bunch of other classes.
+> Use the pattern when you can’t reuse a component in a different program because it’s too dependent on other components.
+> Use the Mediator when you find yourself creating tons of component subclasses just to reuse some basic behavior in various contexts.
 
 💾 Memento
 -------
-Real world example
-> Take the example of calculator (i.e. originator), where whenever you perform some calculation the last calculation is saved in memory (i.e. memento) so that you can get back to it and maybe get it restored using some action buttons (i.e. caretaker).
+Real world problem
+> Imagine that you’re creating a text editor app. In addition to simple text editing, your editor can format text, insert inline images, etc.
+> At some point, you decided to let users undo any operations carried out on the text. This feature has become so common over the years that nowadays people expect every app to have it. For the implementation, you chose to take the direct approach. Before performing any operation, the app records the state of all objects and saves it in some storage. Later, when a user decides to revert an action, the app fetches the latest snapshot from the history and uses it to restore the state of all objects.
+> Unfortunately, most real objects won’t let others peek inside them that easily, hiding all significant data in private fields.
+> Ignore that problem for now, it still has some serious issues. In the future, you might decide to refactor some of the editor classes, or add or remove some of the fields. Sounds easy, but this would also require changing the classes responsible for copying the state of the affected objects.
+> But there’s more. Let’s consider the actual “snapshots” of the editor’s state. What data does it contain? At a bare minimum, it must contain the actual text, cursor coordinates, current scroll position, etc. To make a snapshot, you’d need to collect these values and put them into some kind of container.
+> Most likely, you’re going to store lots of these container objects inside some list that would represent the history. Therefore the containers would probably end up being objects of one class. The class would have almost no methods, but lots of fields that mirror the editor’s state. To allow other objects to write and read data to and from a snapshot, you’d probably need to make its fields public. That would expose all the editor’s states, private or not. Other classes would become dependent on every little change to the snapshot class, which would otherwise happen within private fields and methods without affecting outer classes.
+
+Solution
+> All problems that we’ve just experienced are caused by broken encapsulation. Some objects try to do more than they are supposed to. 
+> The Memento pattern delegates creating the state snapshots to the actual owner of that state, the originator object. Hence, instead of other objects trying to copy the editor’s state from the “outside,” the editor class itself can make the snapshot since it has full access to its own state.
+> The pattern suggests storing the copy of the object’s state in a special object called memento. The contents of the memento aren’t accessible to any other object except the one that produced it. Other objects must communicate with mementos using a limited interface which may allow fetching the snapshot’s metadata (creation time, the name of the performed operation, etc.), but not the original object’s state contained in the snapshot.
+> Such a restrictive policy lets you store mementos inside other objects, usually called caretakers. Since the caretaker works with the memento only via the limited interface, it’s not able to tamper with the state stored inside the memento. At the same time, the originator has access to all fields inside the memento, allowing it to restore its previous state at will.
+> In our text editor example, we can create a separate history class to act as the caretaker. A stack of mementos stored inside the caretaker will grow each time the editor is about to execute an operation. You could even render this stack within the app’s UI, displaying the history of previously performed operations to a user.
 
 In plain words
-> Memento pattern is about capturing and storing the current state of an object in a manner that it can be restored later on in a smooth manner.
+> Memento is a behavioral design pattern that lets you save and restore the previous state of an object without revealing the details of its implementation.
 
 Wikipedia says
 > The memento pattern is a software design pattern that provides the ability to restore an object to its previous state (undo via rollback).
 
-Usually useful when you need to provide some sort of undo functionality.
-
-**Programmatic Example**
-
-Lets take an example of text editor which keeps saving the state from time to time and that you can restore if you want.
-
-First of all we have our memento object that will be able to hold the editor state
-
-```C#
-class EditorMemento
-{
-  private string mContent;
-
-  public EditorMemento(string content)
-  {
-    mContent = content;
-  }
-
-  public string Content
-  {
-    get
-    {
-      return mContent;
-    }
-  }
-}
-```
-
-Then we have our editor i.e. originator that is going to use memento object
-
-```C#
-class Editor {
-
-  private string mContent = string.Empty;
-  private EditorMemento memento;
-
-  public Editor()
-  {
-    memento = new EditorMemento(string.Empty);
-  }
-
-  public void Type(string words)
-  {
-    mContent = String.Concat(mContent," ", words);
-  }
-
-  public string Content
-  {
-    get
-    {
-      return mContent;
-    }
-  }
-
-  public void Save()
-  {
-    memento = new EditorMemento(mContent);
-  }
-
-  public void Restore()
-  {
-    mContent = memento.Content;
-  }
-}
-```
-
-And then it can be used as
-
-```C#
-var editor = new Editor();
-
-//Type some stuff
-editor.Type("This is the first sentence.");
-editor.Type("This is second.");
-
-// Save the state to restore to : This is the first sentence. This is second.
-editor.Save();
-
-//Type some more
-editor.Type("This is third.");
-
-//Output the content
-Console.WriteLine(editor.Content); // This is the first sentence. This is second. This is third.
-
-//Restoring to last saved state
-editor.Restore();
-
-Console.Write(editor.Content); // This is the first sentence. This is second
-
-```
+When to use
+> Use the Memento pattern when you want to produce snapshots of the object’s state to be able to restore a previous state of the object.
+> Use the pattern when direct access to the object’s fields/getters/setters violates its encapsulation.
 
 😎 Observer
 --------
-Real world example
-> A good example would be the job seekers where they subscribe to some job posting site and they are notified whenever there is a matching job opportunity.   
+Real world problem
+> Imagine that you have two types of objects: a Customer and a Store. The customer is very interested in a particular brand of product (say, it’s a new model of the iPhone) which should become available in the store very soon.
+> The customer could visit the store every day and check product availability. But while the product is still en route, most of these trips would be pointless.
+> On the other hand, the store could send tons of emails (which might be considered spam) to all customers each time a new product becomes available. This would save some customers from endless trips to the store. At the same time, it’d upset other customers who aren’t interested in new products.
+> It looks like we’ve got a conflict. Either the customer wastes time checking product availability or the store wastes resources notifying the wrong customers.
+
+Solution
+> The object that has some interesting state is often called subject, but since it’s also going to notify other objects about the changes to its state, we’ll call it publisher. All other objects that want to track changes to the publisher’s state are called subscribers.
+> The Observer pattern suggests that you add a subscription mechanism to the publisher class so individual objects can subscribe to or unsubscribe from a stream of events coming from that publisher. Fear not! Everything isn’t as complicated as it sounds. In reality, this mechanism consists of 1) an array field for storing a list of references to subscriber objects and 2) several public methods which allow adding subscribers to and removing them from that list.
+> Now, whenever an important event happens to the publisher, it goes over its subscribers and calls the specific notification method on their objects.
+
+> Real apps might have dozens of different subscriber classes that are interested in tracking events of the same publisher class. You wouldn’t want to couple the publisher to all of those classes. Besides, you might not even know about some of them beforehand if your publisher class is supposed to be used by other people.
 
 In plain words
-> Defines a dependency between objects so that whenever an object changes its state, all its dependents are notified.
+> Observer is a behavioral design pattern that lets you define a subscription mechanism to notify multiple objects about any events that happen to the object they’re observing.
 
 Wikipedia says
 > The observer pattern is a software design pattern in which an object, called the subject, maintains a list of its dependents, called observers, and notifies them automatically of any state changes, usually by calling one of their methods.
 
-**Programmatic example**
+When to use
+> Use the Observer pattern when changes to the state of one object may require changing other objects, and the actual set of objects is unknown beforehand or changes dynamically.
+> Use the pattern when some objects in your app must observe others, but only for a limited time or in specific cases.
 
-Translating our example from above. First of all we have job seekers that need to be notified for a job posting
-```C#
-class JobPost
-{
-  public string Title { get; private set; }
-
-  public JobPost(string title)
-  {
-    Title = title;
-  }
-}
-class JobSeeker : IObserver<JobPost>
-{
-  public string Name { get; private set; }
-
-  public JobSeeker(string name)
-  {
-    Name = name;
-  }
-
-  //Method is not being called by JobPostings class currently
-  public void OnCompleted()
-  {
-    //No Implementation
-  }
-
-  //Method is not being called by JobPostings class currently
-  public void OnError(Exception error)
-  {
-    //No Implementation
-  }
-
-  public void OnNext(JobPost value)
-  {
-    Console.WriteLine($"Hi {Name} ! New job posted: {value.Title}");
-  }
-}
-```
-Then we have our job postings to which the job seekers will subscribe
-```C#
-class JobPostings : IObservable<JobPost>
-{
-  private List<IObserver<JobPost>> mObservers;
-  private List<JobPost> mJobPostings;
-
-  public JobPostings()
-  {
-    mObservers = new List<IObserver<JobPost>>();
-    mJobPostings = new List<JobPost>();
-  }
-
-  public IDisposable Subscribe(IObserver<JobPost> observer)
-  {
-    // Check whether observer is already registered. If not, add it
-    if (!mObservers.Contains(observer))
-    {
-      mObservers.Add(observer);
-    }
-    return new Unsubscriber<JobPost>(mObservers, observer);
-  }
-
-  private void Notify(JobPost jobPost)
-  {
-    foreach(var observer in mObservers)
-    {
-      observer.OnNext(jobPost);
-    }
-  }
-
-  public void AddJob(JobPost jobPost)
-  {
-    mJobPostings.Add(jobPost);
-    Notify(jobPost);
-  }
-
-}
-
-internal class Unsubscriber<JobPost> : IDisposable
-{
-  private List<IObserver<JobPost>> mObservers;
-  private IObserver<JobPost> mObserver;
-
-  internal Unsubscriber(List<IObserver<JobPost>> observers, IObserver<JobPost> observer)
-  {
-    this.mObservers = observers;
-    this.mObserver = observer;
-  }
-
-  public void Dispose()
-  {
-    if (mObservers.Contains(mObserver))
-      mObservers.Remove(mObserver);
-  }
-}
-```
-Then it can be used as
-```C#
-//Create Subscribers
-var johnDoe = new JobSeeker("John Doe");
-var janeDoe = new JobSeeker("Jane Doe");
-
-//Create publisher and attch subscribers
-var jobPostings = new JobPostings();
-jobPostings.Subscribe(johnDoe);
-jobPostings.Subscribe(janeDoe);
-
-//Add a new job and see if subscribers get notified
-jobPostings.AddJob(new JobPost("Software Engineer"));
-
-//Output
-// Hi John Doe! New job posted: Software Engineer
-// Hi Jane Doe! New job posted: Software Engineer
-
-Console.ReadLine();
-```
 
 🏃 Visitor
 -------
-Real world example
-> Consider someone visiting Dubai. They just need a way (i.e. visa) to enter Dubai. After arrival, they can come and visit any place in Dubai on their own without having to ask for permission or to do some leg work in order to visit any place here; just let them know of a place and they can visit it. Visitor pattern lets you do just that, it helps you add places to visit so that they can visit as much as they can without having to do any legwork.
+Real world problem
+> Imagine that your team develops an app which works with geographic information structured as one colossal graph. Each node of the graph may represent a complex entity such as a city, but also more granular things like industries, sightseeing areas, etc. The nodes are connected with others if there’s a road between the real objects that they represent. Under the hood, each node type is represented by its own class, while each specific node is an object.
+> At some point, you got a task to implement exporting the graph into XML format. At first, the job seemed pretty straightforward. You planned to add an export method to each node class and then leverage recursion to go over each node of the graph, executing the export method. The solution was simple and elegant: thanks to polymorphism, you weren’t coupling the code which called the export method to concrete classes of nodes.
+> Unfortunately, the system architect refused to allow you to alter existing node classes. He said that the code was already in production and he didn’t want to risk breaking it because of a potential bug in your changes.
+> Besides, he questioned whether it makes sense to have the XML export code within the node classes. The primary job of these classes was to work with geodata. The XML export behavior would look alien there.
+> And what if you need to add the export to other formats.
+
+Solution
+> The Visitor pattern suggests that you place the new behavior into a separate class called visitor, instead of trying to integrate it into existing classes. The original object that had to perform the behavior is now passed to one of the visitor’s methods as an argument, providing the method access to all necessary data contained within the object.
+> Instead of letting the client select a proper version of the method to call, how about we delegate this choice to objects we’re passing to the visitor as an argument? Since the objects know their own classes, they’ll be able to pick a proper method on the visitor less awkwardly. They “accept” a visitor and tell it what visiting method should be executed.
+> We had to change the node classes after all. But at least the change is trivial and it lets us add further behaviors without altering the code once again.
 
 In plain words
-> Visitor pattern lets you add further operations to objects without having to modify them.
+> Visitor is a behavioral design pattern that lets you separate algorithms from the objects on which they operate.
 
 Wikipedia says
 > In object-oriented programming and software engineering, the visitor design pattern is a way of separating an algorithm from an object structure on which it operates. A practical result of this separation is the ability to add new operations to existing object structures without modifying those structures. It is one way to follow the open/closed principle.
 
-**Programmatic example**
-
-Let's take an example of a zoo simulation where we have several different kinds of animals and we have to make them Sound. Let's translate this using visitor pattern
-
-```C#
-// Visitee
-interface IAnimal
-{
-  void Accept(IAnimalOperation operation);
-}
-
-// Visitor
-interface IAnimalOperation
-{
-  void VisitMonkey(Monkey monkey);
-  void VisitLion(Lion lion);
-  void VisitDolphin(Dolphin dolphin);
-}
-```
-Then we have our implementations for the animals
-```C#
-class Monkey : IAnimal
-{
-  public void Shout()
-  {
-    Console.WriteLine("Oooh o aa aa!");
-  }
-
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitMonkey(this);
-  }
-}
-
-class Lion : IAnimal
-{
-  public void Roar()
-  {
-    Console.WriteLine("Roaar!");
-  }
-
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitLion(this);
-  }
-}
-
-class Dolphin : IAnimal
-{
-  public void Speak()
-  {
-    Console.WriteLine("Tuut tittu tuutt!");
-  }
-
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitDolphin(this);
-  }
-}
-```
-Let's implement our visitor
-```C#
-class Speak : IAnimalOperation
-{
-  public void VisitDolphin(Dolphin dolphin)
-  {
-    dolphin.Speak();
-  }
-
-  public void VisitLion(Lion lion)
-  {
-    lion.Roar();
-  }
-
-  public void VisitMonkey(Monkey monkey)
-  {
-    monkey.Shout();
-  }
-}
-```
-
-And then it can be used as
-```C#
-var monkey = new Monkey();
-var lion = new Lion();
-var dolphin = new Dolphin();
-
-var speak = new Speak();
-
-monkey.Accept(speak);    // Ooh oo aa aa!
-lion.Accept(speak);      // Roaaar!
-dolphin.Accept(speak);   // Tuut tutt tuutt!
-
-```
-We could have done this simply by having an inheritance hierarchy for the animals but then we would have to modify the animals whenever we would have to add new actions to animals. But now we will not have to change them. For example, let's say we are asked to add the jump behavior to the animals, we can simply add that by creating a new visitor i.e.
-
-```C#
-class Jump : IAnimalOperation
-{
-  public void VisitDolphin(Dolphin dolphin)
-  {
-    Console.WriteLine("Walked on water a little and disappeared!");
-  }
-
-  public void VisitLion(Lion lion)
-  {
-    Console.WriteLine("Jumped 7 feet! Back on the ground!");
-  }
-
-  public void VisitMonkey(Monkey monkey)
-  {
-    Console.WriteLine("Jumped 20 feet high! on to the tree!");
-  }
-}
-```
-And for the usage
-```C#
-var jump = new Jump();
-
-monkey.Accept(speak);   // Ooh oo aa aa!
-monkey.Accept(jump);    // Jumped 20 feet high! on to the tree!
-
-lion.Accept(speak);     // Roaaar!
-lion.Accept(jump);      // Jumped 7 feet! Back on the ground!
-
-dolphin.Accept(speak);  // Tuut tutt tuutt!
-dolphin.Accept(jump);   // Walked on water a little and disappeared
-
-```
+When to use
+> Use the Visitor when you need to perform an operation on all elements of a complex object structure (for example, an object tree).
+> Use the Visitor to clean up the business logic of auxiliary behaviors.
+> Use the pattern when a behavior makes sense only in some classes of a class hierarchy, but not in others.
 
 💡 Strategy
 --------
 
-Real world example
-> Consider the example of sorting, we implemented bubble sort but the data started to grow and bubble sort started getting very slow. In order to tackle this we implemented Quick sort. But now although the quick sort algorithm was doing better for large datasets, it was very slow for smaller datasets. In order to handle this we implemented a strategy where for small datasets, bubble sort will be used and for larger, quick sort.
+Real world problem
+> One day you decided to create a navigation app for casual travelers. The app was centered around a beautiful map which helped users quickly orient themselves in any city.
+> One of the most requested features for the app was automatic route planning. A user should be able to enter an address and see the fastest route to that destination displayed on the map.
+> The first version of the app could only build the routes over roads. People who traveled by car were bursting with joy. But apparently, not everybody likes to drive on their vacation. So with the next update, you added an option to build walking routes. Right after that, you added another option to let people use public transport in their routes.
+> However, that was only the beginning. Later you planned to add route building for cyclists. And even later, another option for building routes through all of a city’s tourist attractions.
+> Each time you added a new routing algorithm, the main class of the navigator doubled in size. At some point, the beast became too hard to maintain.
+> Any change to one of the algorithms, whether it was a simple bug fix or a slight adjustment of the street score, affected the whole class, increasing the chance of creating an error in already-working code.
+> In addition, teamwork became inefficient. Your teammates, who had been hired right after the successful release, complain that they spend too much time resolving merge conflicts. Implementing a new feature requires you to change the same huge class, conflicting with the code produced by other people.
+
+Solution
+
+> The Strategy pattern suggests that you take a class that does something specific in a lot of different ways and extract all of these algorithms into separate classes called strategies.
+> The original class, called context, must have a field for storing a reference to one of the strategies. The context delegates the work to a linked strategy object instead of executing it on its own.
+> The context isn’t responsible for selecting an appropriate algorithm for the job. Instead, the client passes the desired strategy to the context. In fact, the context doesn’t know much about strategies. It works with all strategies through the same generic interface, which only exposes a single method for triggering the algorithm encapsulated within the selected strategy.
+> This way the context becomes independent of concrete strategies, so you can add new algorithms or modify existing ones without changing the code of the context or other strategies.
+> In our navigation app, each routing algorithm can be extracted to its own class with a single buildRoute method. The method accepts an origin and destination and returns a collection of the route’s checkpoints.
+> Even though given the same arguments, each routing class might build a different route, the main navigator class doesn’t really care which algorithm is selected since its primary job is to render a set of checkpoints on the map. The class has a method for switching the active routing strategy, so its clients, such as the buttons in the user interface, can replace the currently selected routing behavior with another one.
 
 In plain words
-> Strategy pattern allows you to switch the algorithm or strategy based upon the situation.
+> Strategy is a behavioral design pattern that lets you define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.
 
 Wikipedia says
 > In computer programming, the strategy pattern (also known as the policy pattern) is a behavioural software design pattern that enables an algorithm's behavior to be selected at runtime.
 
-**Programmatic example**
-
-Translating our example from above. First of all we have our strategy interface and different strategy implementations
-
-```C#
-interface ISortStrategy
-{
-  List<int> Sort(List<int> dataset);
-}
-
-class BubbleSortStrategy : ISortStrategy
-{
-  public List<int> Sort(List<int> dataset)
-  {
-    Console.WriteLine("Sorting using Bubble Sort !");
-    return dataset;
-  }
-}
-
-class QuickSortStrategy : ISortStrategy
-{
-  public List<int> Sort(List<int> dataset)
-  {
-    Console.WriteLine("Sorting using Quick Sort !");
-    return dataset;
-  }
-}
-```
-
-And then we have our client that is going to use any strategy
-```C#
-class Sorter
-{
-  private readonly ISortStrategy mSorter;
-
-  public Sorter(ISortStrategy sorter)
-  {
-    mSorter = sorter;
-  }
-
-  public List<int> Sort(List<int> unSortedList)
-  {
-    return mSorter.Sort(unSortedList);
-  }
-}
-```
-And it can be used as
-```C#
-var unSortedList = new List<int> { 1, 10, 2, 16, 19 };
-
-var sorter = new Sorter(new BubbleSortStrategy());
-sorter.Sort(unSortedList); // // Output : Sorting using Bubble Sort !
-
-sorter = new Sorter(new QuickSortStrategy());
-sorter.Sort(unSortedList); // // Output : Sorting using Quick Sort !
-```
+When to use
+> Use the Strategy when you have a lot of similar classes that only differ in the way they execute some behavior.
+> Use the pattern to isolate the business logic of a class from the implementation details of algorithms that may not be as important in the context of that logic.
+> Use the pattern when your class has a massive conditional operator that switches between different variants of the same algorithm.
 
 💢 State
 -----
-Real world example
-> Imagine you are using some drawing application, you choose the paint brush to draw. Now the brush changes its behavior based on the selected color i.e. if you have chosen red color it will draw in red, if blue then it will be in blue etc.  
+Real world problem
+> The State pattern is closely related to the concept of a Finite-State Machine. The main idea is that, at any given moment, there’s a finite number of states which a program can be in. Within any unique state, the program behaves differently, and the program can be switched from one state to another instantaneously. However, depending on a current state, the program may or may not switch to certain other states. These switching rules, called transitions, are also finite and predetermined.
+> State machines are usually implemented with lots of conditional operators (if or switch) that select the appropriate behavior depending on the current state of the object. Usually, this “state” is just a set of values of the object’s fields. Even if you’ve never heard about finite-state machines before, you’ve probably implemented a state at least once.
+> The biggest weakness of a state machine based on conditionals reveals itself once we start adding more and more states and state-dependent behaviors to the Document class. Most methods will contain monstrous conditionals that pick the proper behavior of a method according to the current state. Code like this is very difficult to maintain because any change to the transition logic may require changing state conditionals in every method.
+> The problem tends to get bigger as a project evolves. It’s quite difficult to predict all possible states and transitions at the design stage. Hence, a lean state machine built with a limited set of conditionals can grow into a bloated mess over time.
+
+Solution
+> The State pattern suggests that you create new classes for all possible states of an object and extract all state-specific behaviors into these classes.
+> Instead of implementing all behaviors on its own, the original object, called context, stores a reference to one of the state objects that represents its current state, and delegates all the state-related work to that object.
 
 In plain words
-> It lets you change the behavior of a class when the state changes.
+> State is a behavioral design pattern that lets an object alter its behavior when its internal state changes. It appears as if the object changed its class.
 
 Wikipedia says
 > The state pattern is a behavioral software design pattern that implements a state machine in an object-oriented way. With the state pattern, a state machine is implemented by implementing each individual state as a derived class of the state pattern interface, and implementing state transitions by invoking methods defined by the pattern's superclass.
 > The state pattern can be interpreted as a strategy pattern which is able to switch the current strategy through invocations of methods defined in the pattern's interface.
 
-**Programmatic example**
+When to use
 
-Let's take an example of text editor, it lets you change the state of text that is typed i.e. if you have selected bold, it starts writing in bold, if italic then in italics etc.
-
-First of all we have our state interface and some state implementations
-
-```C#
-interface IWritingState {
-
-  void Write(string words);
-
-}
-
-class UpperCase : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words.ToUpper());
-  }
-}
-
-class LowerCase : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words.ToLower());
-  }
-}
-
-class DefaultText : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words);
-  }
-}
-```
-Then we have our editor
-```C#
-class TextEditor {
-
-  private IWritingState mState;
-
-  public TextEditor()
-  {
-    mState = new DefaultText();
-  }
-
-  public void SetState(IWritingState state)
-  {
-    mState = state;
-  }
-
-  public void Type(string words)
-  {
-    mState.Write(words);
-  }
-
-}
-```
-And then it can be used as
-```C#
-var editor = new TextEditor();
-
-editor.Type("First line");
-
-editor.SetState(new UpperCase());
-
-editor.Type("Second Line");
-editor.Type("Third Line");
-
-editor.SetState(new LowerCase());
-
-editor.Type("Fourth Line");
-editor.Type("Fifthe Line");
-
-// Output:
-// First line
-// SECOND LINE
-// THIRD LINE
-// fourth line
-// fifth line
-```
+> Use the State pattern when you have an object that behaves differently depending on its current state, the number of states is enormous, and the state-specific code changes frequently.
+> Use the pattern when you have a class polluted with massive conditionals that alter how the class behaves according to the current values of the class’s fields.
+>
 
 📒 Template Method
 ---------------
 
-Real world example
-> Suppose we are getting some house built. The steps for building might look like
-> - Prepare the base of house
-> - Build the walls
-> - Add roof
-> - Add other floors
+Real world problem
+> Imagine that you’re creating a data mining application that analyzes corporate documents. Users feed the app documents in various formats (PDF, DOC, CSV), and it tries to extract meaningful data from these docs in a uniform format.
+> The first version of the app could work only with DOC files. In the following version, it was able to support CSV files. A month later, you “taught” it to extract data from PDF files.
+> At some point, you noticed that all three classes have a lot of similar code. While the code for dealing with various data formats was entirely different in all classes, the code for data processing and analysis is almost identical. Wouldn’t it be great to get rid of the code duplication, leaving the algorithm structure intact?
+> There was another problem related to client code that used these classes. It had lots of conditionals that picked a proper course of action depending on the class of the processing object. If all three processing classes had a common interface or a base class, you’d be able to eliminate the conditionals in client code and use polymorphism when calling methods on a processing object.
 
-> The order of these steps could never be changed i.e. you can't build the roof before building the walls etc but each of the steps could be modified for example walls can be made of wood or polyester or stone.
+Solution
+> The Template Method pattern suggests that you break down an algorithm into a series of steps, turn these steps into methods, and put a series of calls to these methods inside a single template method. The steps may either be abstract, or have some default implementation. To use the algorithm, the client is supposed to provide its own subclass, implement all abstract steps, and override some of the optional ones if needed (but not the template method itself).
+> Let’s see how this will play out in our data mining app. We can create a base class for all three parsing algorithms. This class defines a template method consisting of a series of calls to various document-processing steps.
+> At first, we can declare all steps abstract, forcing the subclasses to provide their own implementations for these methods. In our case, subclasses already have all necessary implementations, so the only thing we might need to do is adjust signatures of the methods to match the methods of the superclass.
+  
+> Now, let’s see what we can do to get rid of the duplicate code. It looks like the code for opening/closing files and extracting/parsing data is different for various data formats, so there’s no point in touching those methods. However, implementation of other steps, such as analyzing the raw data and composing reports, is very similar, so it can be pulled up into the base class, where subclasses can share that code.
+  
+> As you can see, we’ve got two types of steps:
+  
+> abstract steps must be implemented by every subclass
+  optional steps already have some default implementation, but still can be overridden if needed
+  There’s another type of step, called hooks. A hook is an optional step with an empty body. A template method would work even if a hook isn’t overridden. Usually, hooks are placed before and after crucial steps of algorithms, providing subclasses with additional extension points for an algorithm.
 
 In plain words
-> Template method defines the skeleton of how a certain algorithm could be performed, but defers the implementation of those steps to the children classes.
+> Template Method is a behavioral design pattern that defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the algorithm without changing its structure.
 
 Wikipedia says
 > In software engineering, the template method pattern is a behavioral design pattern that defines the program skeleton of an algorithm in an operation, deferring some steps to subclasses. It lets one redefine certain steps of an algorithm without changing the algorithm's structure.
 
-**Programmatic Example**
-
-Imagine we have a build tool that helps us test, lint, build, generate build reports (i.e. code coverage reports, linting report etc) and deploy our app on the test server.
-
-First of all we have our base class that specifies the skeleton for the build algorithm
-```C#
-abstract class Builder
-{
-    // Template method
-    public void Build()
-    {
-      Test();
-      Lint();
-      Assemble();
-      Deploy();
-    }
-
-    abstract public void Test();
-    abstract public void Lint();
-    abstract public void Assemble();
-    abstract public void Deploy();
-}
-```
-
-Then we can have our implementations
-
-```C#
-class AndroidBuilder : Builder
-{
-  public override void Assemble()
-  {
-    Console.WriteLine("Assembling the android build");
-  }
-
-  public override void Deploy()
-  {
-    Console.WriteLine("Deploying android build to server");
-  }
-
-  public override void Lint()
-  {
-    Console.WriteLine("Linting the android code");
-  }
-
-  public override void Test()
-  {
-    Console.WriteLine("Running android tests");
-  }
-}
-
-
-class IosBuilder : Builder
-{
-  public override void Assemble()
-  {
-    Console.WriteLine("Assembling the ios build");
-  }
-
-  public override void Deploy()
-  {
-    Console.WriteLine("Deploying ios build to server");
-  }
-
-  public override void Lint()
-  {
-    Console.WriteLine("Linting the ios code");
-  }
-
-  public override void Test()
-  {
-    Console.WriteLine("Running ios tests");
-  }
-}
-
-```
-And then it can be used as
-
-```C#
-var androidBuilder = new AndroidBuilder();
-androidBuilder.Build();
-
-// Output:
-// Running android tests
-// Linting the android code
-// Assembling the android build
-// Deploying android build to server
-
-var iosBuilder = new IosBuilder();
-iosBuilder.Build();
-
-// Output:
-// Running ios tests
-// Linting the ios code
-// Assembling the ios build
-// Deploying ios build to server
-```
+When to use
+> Use the Template Method pattern when you want to let clients extend only particular steps of an algorithm, but not the whole algorithm or its structure.
+> Use the pattern when you have several classes that contain almost identical algorithms with some minor differences. As a result, you might need to modify all classes when the algorithm changes.

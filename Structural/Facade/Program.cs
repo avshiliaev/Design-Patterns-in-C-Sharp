@@ -14,7 +14,7 @@ namespace Structural.Facade
             var audioEncoder = new AudioEncoder();
             var videoEncoder = new VideoEncoder();
             var mediaEncoder = new MediaEncoderFacade(audioEncoder, videoEncoder);
-            
+
             App.EncodeUserVideoClip(mediaEncoder, "some_user_video_clip");
         }
     }
