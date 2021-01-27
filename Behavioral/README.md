@@ -123,16 +123,30 @@ When to use
 
 💾 Memento
 -------
-Real world example
-> Take the example of calculator (i.e. originator), where whenever you perform some calculation the last calculation is saved in memory (i.e. memento) so that you can get back to it and maybe get it restored using some action buttons (i.e. caretaker).
+Real world problem
+> Imagine that you’re creating a text editor app. In addition to simple text editing, your editor can format text, insert inline images, etc.
+> At some point, you decided to let users undo any operations carried out on the text. This feature has become so common over the years that nowadays people expect every app to have it. For the implementation, you chose to take the direct approach. Before performing any operation, the app records the state of all objects and saves it in some storage. Later, when a user decides to revert an action, the app fetches the latest snapshot from the history and uses it to restore the state of all objects.
+> Unfortunately, most real objects won’t let others peek inside them that easily, hiding all significant data in private fields.
+> Ignore that problem for now, it still has some serious issues. In the future, you might decide to refactor some of the editor classes, or add or remove some of the fields. Sounds easy, but this would also require changing the classes responsible for copying the state of the affected objects.
+> But there’s more. Let’s consider the actual “snapshots” of the editor’s state. What data does it contain? At a bare minimum, it must contain the actual text, cursor coordinates, current scroll position, etc. To make a snapshot, you’d need to collect these values and put them into some kind of container.
+> Most likely, you’re going to store lots of these container objects inside some list that would represent the history. Therefore the containers would probably end up being objects of one class. The class would have almost no methods, but lots of fields that mirror the editor’s state. To allow other objects to write and read data to and from a snapshot, you’d probably need to make its fields public. That would expose all the editor’s states, private or not. Other classes would become dependent on every little change to the snapshot class, which would otherwise happen within private fields and methods without affecting outer classes.
+
+Solution
+> All problems that we’ve just experienced are caused by broken encapsulation. Some objects try to do more than they are supposed to. 
+> The Memento pattern delegates creating the state snapshots to the actual owner of that state, the originator object. Hence, instead of other objects trying to copy the editor’s state from the “outside,” the editor class itself can make the snapshot since it has full access to its own state.
+> The pattern suggests storing the copy of the object’s state in a special object called memento. The contents of the memento aren’t accessible to any other object except the one that produced it. Other objects must communicate with mementos using a limited interface which may allow fetching the snapshot’s metadata (creation time, the name of the performed operation, etc.), but not the original object’s state contained in the snapshot.
+> Such a restrictive policy lets you store mementos inside other objects, usually called caretakers. Since the caretaker works with the memento only via the limited interface, it’s not able to tamper with the state stored inside the memento. At the same time, the originator has access to all fields inside the memento, allowing it to restore its previous state at will.
+> In our text editor example, we can create a separate history class to act as the caretaker. A stack of mementos stored inside the caretaker will grow each time the editor is about to execute an operation. You could even render this stack within the app’s UI, displaying the history of previously performed operations to a user.
 
 In plain words
-> Memento pattern is about capturing and storing the current state of an object in a manner that it can be restored later on in a smooth manner.
+> Memento is a behavioral design pattern that lets you save and restore the previous state of an object without revealing the details of its implementation.
 
 Wikipedia says
 > The memento pattern is a software design pattern that provides the ability to restore an object to its previous state (undo via rollback).
 
-Usually useful when you need to provide some sort of undo functionality.
+When to use
+> Use the Memento pattern when you want to produce snapshots of the object’s state to be able to restore a previous state of the object.
+> Use the pattern when direct access to the object’s fields/getters/setters violates its encapsulation.
 
 😎 Observer
 --------
