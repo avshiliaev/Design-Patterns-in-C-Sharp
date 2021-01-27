@@ -1,6 +1,5 @@
 using System;
 using Behavioral.State.Abstractions;
-using Behavioral.State.Interfaces;
 
 namespace Behavioral.State.States
 {
@@ -15,10 +14,10 @@ namespace Behavioral.State.States
 
         public override void HandleCheckPending()
         {
-            if(Pending)
+            if (Pending)
                 Context.TransitionTo(new AccountPending());
         }
-        
+
         public override void HandleProcessState()
         {
             Console.WriteLine("Handle as blocked");

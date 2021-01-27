@@ -73,14 +73,30 @@ When to use
 ➿ Iterator
 --------
 
-Real world example
-> An old radio set will be a good example of iterator, where user could start at some channel and then use next or previous buttons to go through the respective channels. Or take an example of MP3 player or a TV set where you could press the next and previous buttons to go through the consecutive channels or in other words they all provide an interface to iterate through the respective channels, songs or radio stations.
+Real world problem
+> Collections are one of the most used data types in programming. Nonetheless, a collection is just a container for a group of objects.
+> Most collections store their elements in simple lists. However, some of them are based on stacks, trees, graphs and other complex data structures.
+> But no matter how a collection is structured, it must provide some way of accessing its elements so that other code can use these elements. There should be a way to go through each element of the collection without accessing the same elements over and over.
+> Adding more and more traversal algorithms to the collection gradually blurs its primary responsibility, which is efficient data storage. Additionally, some algorithms might be tailored for a specific application, so including them into a generic collection class would be weird.
+> On the other hand, the client code that’s supposed to work with various collections may not even care how they store their elements. However, since collections all provide different ways of accessing their elements, you have no option other than to couple your code to the specific collection classes.
+
+Solution
+> The main idea of the Iterator pattern is to extract the traversal behavior of a collection into a separate object called an iterator.
+> In addition to implementing the algorithm itself, an iterator object encapsulates all of the traversal details, such as the current position and how many elements are left till the end. Because of this, several iterators can go through the same collection at the same time, independently of each other.
+> Usually, iterators provide one primary method for fetching elements of the collection. The client can keep running this method until it doesn’t return anything, which means that the iterator has traversed all of the elements.
+> All iterators must implement the same interface. This makes the client code compatible with any collection type or any traversal algorithm as long as there’s a proper iterator. If you need a special way to traverse a collection, you just create a new iterator class, without having to change the collection or the client.
 
 In plain words
-> It presents a way to access the elements of an object without exposing the underlying presentation.
+> Iterator is a behavioral design pattern that lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 
 Wikipedia says
 > In object-oriented programming, the iterator pattern is a design pattern in which an iterator is used to traverse a container and access the container's elements. The iterator pattern decouples algorithms from containers; in some cases, algorithms are necessarily container-specific and thus cannot be decoupled.
+
+When to use
+
+> Use the Iterator pattern when your collection has a complex data structure under the hood, but you want to hide its complexity from clients (either for convenience or security reasons).
+> Use the pattern to reduce duplication of the traversal code across your app.
+> Use the Iterator when you want your code to be able to traverse different data structures or when types of these structures are unknown beforehand.
 
 👽 Mediator
 ========

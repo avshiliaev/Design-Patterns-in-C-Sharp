@@ -29,6 +29,5 @@ namespace Behavioral.State.Abstractions
         public abstract void HandleCheckPending();
 
         public abstract void HandleProcessState();
-
     }
 }
