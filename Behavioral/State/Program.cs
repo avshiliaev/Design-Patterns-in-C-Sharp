@@ -17,11 +17,11 @@ namespace Behavioral.State
                 Blocked = false
             };
 
-            var context = new AccountContext(new AccountPending(), accountCheckEvent);
+            var account = new AccountContext(new AccountPending(), accountCheckEvent);
 
-            context.CheckBlocked();
-            context.CheckPending();
-            context.ProcessState();
+            account.CheckBlocked();
+            account.CheckPending();
+            account.ProcessState();
         }
     }
 }
