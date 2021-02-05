@@ -1,18 +1,14 @@
 <h3 align="center">
-Adaptation of <a href="https://github.com/kamranahmedse/design-patterns-for-humans">Design Patterns for Humans</a>  to C#
+Adaptation of: 
 </h3>
-<p align="center"><sub>All the explanation for design patterns stays the same, with minor changes.</sub></p>
 
-****
+1. <a href="https://github.com/kamranahmedse/design-patterns-for-humans">Design Patterns for Humans</a>
+1. <a href="https://refactoring.guru/">Refactoring Guru</a>
+1. <a href="https://sourcemaking.com/">SourceMaking</a>
 
 <p align="center">
-🎉 Ultra-simplified explanation to design patterns! 🎉
-</p>
-<p align="center">
-A topic that can easily make anyone's mind wobble. Here I try to make them stick in to your mind (and maybe mine) by explaining them in the <i>simplest</i> way possible.
-</p>
-<p align="center">
-You can find full length examples for code snippets used in this article <a href="https://github.com/anupavanm/csharp-design-patterns-for-humans-examples">here.</a>
+<sub>The code part is adapted by me based on many different conceptual examples.</sub>
+<sub>All the textual explanation for design patterns stays the same, with minor changes.</sub>
 </p>
 
 ****
@@ -38,6 +34,6 @@ Wikipedia describes them as
 Types of Design Patterns
 -----------------
 
-* [Creational](#creational-design-patterns)
-* [Structural](#structural-design-patterns)
-* [Behavioral](#behavioral-design-patterns)
+* [Creational](Creational/README.md)
+* [Structural](Structural/README.md)
+* [Behavioral](Behavioral/README.md)
