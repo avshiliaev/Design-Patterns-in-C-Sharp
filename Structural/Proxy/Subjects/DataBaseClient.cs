@@ -1,4 +1,3 @@
-using System;
 using Structural.Proxy.Interfaces;
 
 namespace Structural.Proxy.Subjects
