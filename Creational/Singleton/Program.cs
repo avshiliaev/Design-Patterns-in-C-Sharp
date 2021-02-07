@@ -1,4 +1,5 @@
 using System;
+using Creational.Singleton.Singletons;
 
 namespace Creational.Singleton
 {
