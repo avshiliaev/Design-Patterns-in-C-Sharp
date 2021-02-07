@@ -7,123 +7,150 @@ In plain words
 Wikipedia says
 > In software engineering, creational design patterns are design patterns that deal with object creation mechanisms, trying to create objects in a manner suitable to the situation. The basic form of object creation could result in design problems or added complexity to the design. Creational design patterns solve this problem by somehow controlling this object creation.
 
- * [Simple Factory](#-simple-factory)
  * [Factory Method](#-factory-method)
  * [Abstract Factory](#-abstract-factory)
  * [Builder](#-builder)
  * [Prototype](#-prototype)
  * [Singleton](#-singleton)
 
-🏠 Simple Factory
---------------
-Real world example
-> Consider, you are building a house and you need doors. It would be a mess if every time you need a door, you put on your carpenter clothes and start making a door in your house. Instead you get it made from a factory.
-
-In plain words
-> Simple factory simply generates an instance for client without exposing any instantiation logic to the client
-
-Wikipedia says
-> In object-oriented programming (OOP), a factory is an object for creating other objects – formally a factory is a function or method that returns objects of a varying prototype or class from some method call, which is assumed to be "new".
-
-**When to Use?**
-
-When creating an object is not just a few assignments and involves some logic, it makes sense to put it in a dedicated factory instead of repeating the same code everywhere.
-
 🏭 Factory Method
 --------------
 
-Real world example
-> Consider the case of a hiring manager. It is impossible for one person to interview for each of the positions. Based on the job opening, she has to decide and delegate the interview steps to different people.
+### Problem
+A framework needs to standardize the architectural model for a range of applications, but allow for individual applications to define their own domain objects and provide for their instantiation.
 
-In plain words
-> It provides a way to delegate the instantiation logic to child classes.
+### Intent
+* Define an interface for creating an object, but let subclasses decide which class to instantiate. 
+Factory Method lets a class defer instantiation to subclasses.
+* Defining a "virtual" constructor.
+* The `new` operator considered harmful.
 
-Wikipedia says
-> In class-based programming, the factory method pattern is a creational pattern that uses factory methods to deal with the problem of creating objects without having to specify the exact class of the object that will be created. This is done by creating objects by calling a factory method—either specified in an interface and implemented by child classes, or implemented in a base class and optionally overridden by derived classes—rather than by calling a constructor.
+### Discussion
 
-**When to use?**
+A superclass specifies all standard and generic behavior (using pure virtual "placeholders" for creation steps), and then delegates the creation details to subclasses that are supplied by the client.
 
-Useful when there is some generic processing in a class but the required sub-class is dynamically decided at runtime. Or putting it in other words, when the client doesn't know what exact sub-class it might need.
+Factory Method makes a design more customizable and only a little more complicated. Other design patterns require new classes, whereas Factory Method only requires a new operation.
+
+People often use Factory Method as the standard way to create objects; but it isn't necessary if: the class that's instantiated never changes, or instantiation takes place in an operation that subclasses can easily override (such as an initialization operation).
+
+**Factory Method is similar to Abstract Factory but without the emphasis on families.**
+
+Factory Methods are routinely specified by an architectural framework, and then implemented by the user of the framework.
+
+### Check list
+1. If you have an inheritance hierarchy that exercises polymorphism, consider adding a polymorphic creation capability by defining a static factory method in the base class.
+1. Design the arguments to the factory method. What qualities or characteristics are necessary and sufficient to identify the correct derived class to instantiate?
+1. Consider designing an internal "object pool" that will allow objects to be reused instead of created from scratch.
+1. Consider making all constructors private or protected.
 
 🔨 Abstract Factory
 ----------------
 
-Real world example
-> Extending our door example from Simple Factory. Based on your needs you might get a wooden door from a wooden door shop, iron door from an iron shop or a PVC door from the relevant shop. Plus you might need a guy with different kind of specialities to fit the door, for example a carpenter for wooden door, welder for iron door etc. As you can see there is a dependency between the doors now, wooden door needs carpenter, iron door needs a welder etc.
+### Problem
+If an application is to be portable, it needs to encapsulate platform dependencies. These "platforms" might include: windowing system, operating system, database, etc. Too often, this encapsulation is not engineered in advance, and lots of #ifdef case statements with options for all currently supported platforms begin to procreate like rabbits throughout the code.
 
-In plain words
-> A factory of factories; a factory that groups the individual but related/dependent factories together without specifying their concrete classes.
+### Intent
+* Provide an interface for creating families of related or dependent objects without specifying their concrete classes.
+* A hierarchy that encapsulates: many possible "platforms", and the construction of a suite of "products".
+* The `new` operator considered harmful.
 
-Wikipedia says
-> The abstract factory pattern provides a way to encapsulate a group of individual factories that have a common theme without specifying their concrete classes
+### Discussion
 
-**When to use?**
+Provide a level of indirection that abstracts the creation of families of related or dependent objects without directly specifying their concrete classes. The "factory" object has the responsibility for providing creation services for the entire platform family. Clients never create platform objects directly, they ask the factory to do that for them.
 
-When there are interrelated dependencies with not-that-simple creation logic involved
+This mechanism makes exchanging product families easy because the specific class of the factory object appears only once in the application - where it is instantiated. The application can wholesale replace the entire family of products simply by instantiating a different concrete instance of the abstract factory.
+
+Because the service provided by the factory object is so pervasive, it is routinely implemented as a Singleton.
+
+### Check list
+
+1. Decide if "platform independence" and creation services are the current source of pain.
+1. Map out a matrix of "platforms" versus "products".
+1. Define a factory interface that consists of a factory method per product.
+1. Define a factory derived class for each platform that encapsulates all references to the new operator.
+1. The client should retire all references to `new`, and use the factory methods to create the product objects.
 
 👷 Builder
 --------------------------------------------
-Real world example
-> Imagine you are at Hardee's and you order a specific deal, lets say, "Big Hardee" and they hand it over to you without *any questions*; this is the example of simple factory. But there are cases when the creation logic might involve more steps. For example you want a customized Subway deal, you have several options in how your burger is made e.g what bread do you want? what types of sauces would you like? What cheese would you want? etc. In such cases builder pattern comes to the rescue.
 
-In plain words
-> Allows you to create different flavors of an object while avoiding constructor pollution. Useful when there could be several flavors of an object. Or when there are a lot of steps involved in creation of an object.
+### Problem
+An application needs to create the elements of a complex aggregate. The specification for the aggregate exists on secondary storage and one of many representations needs to be built in primary storage.
 
-Wikipedia says
-> The builder pattern is an object creation software design pattern with the intentions of finding a solution to the telescoping constructor anti-pattern.
+### Intent
+* Separate the construction of a complex object from its representation so that the same construction process can create different representations.
+* Parse a complex representation, create one of several targets.
 
-Having said that let me add a bit about what telescoping constructor anti-pattern is. At one point or the other we have all seen a constructor like below:
+### Discussion
 
-```C#
-public Burger(int size, bool cheese, bool pepperoni, bool lettuce, bool tomato)
-{
-}
-```
+Separate the algorithm for interpreting (i.e. reading and parsing) a stored persistence mechanism (e.g. RTF files) from the algorithm for building and representing one of many target products (e.g. ASCII, TeX, text widget). The focus/distinction is on creating complex aggregates.
 
-As you can see; the number of constructor parameters can quickly get out of hand and it might become difficult to understand the arrangement of parameters. Plus this parameter list could keep on growing if you would want to add more options in future. This is called telescoping constructor anti-pattern.
+The "director" invokes "builder" services as it interprets the external format. The "builder" creates part of the complex object each time it is called and maintains all intermediate state. When the product is finished, the client retrieves the result from the "builder".
 
-**When to use?**
+Affords finer control over the construction process. Unlike creational patterns that construct products in one shot, the Builder pattern constructs the product step by step under the control of the "director".
 
-When there could be several flavors of an object and to avoid the constructor telescoping. The key difference from the factory pattern is that; factory pattern is to be used when the creation is a one step process while builder pattern is to be used when the creation is a multi step process.
+### Check list
+1. Decide if a common input and many possible representations (or outputs) is the problem at hand.
+1. Encapsulate the parsing of the common input in a Reader class.
+1. Design a standard protocol for creating all possible output representations. Capture the steps of this protocol in a Builder interface.
+1. Define a Builder derived class for each target representation.
+1. The client creates a Reader object and a Builder object, and registers the latter with the former.
+1. The client asks the Reader to "construct".
+1. The client asks the Builder to return the result.
 
 🐑 Prototype
 ------------
-Real world example
-> Not all objects can be copied that way because some of the object’s fields may be private and not visible from outside of the object itself. 
-> There’s one more problem with the direct approach. Since you have to know the object’s class to create a duplicate, your code becomes dependent on that class.
-> Sometimes you only know the interface that the object follows, but not its concrete class, when, for example, a parameter in a method accepts any objects that follow some interface. 
-> The Prototype pattern delegates the cloning process to the actual objects that are being cloned. 
-> An object that supports cloning is called a prototype. 
 
-In plain words
-> Create object based on an existing object through cloning.
-> Here’s how it works: you create a set of objects, configured in various ways. When you need an object like the one you’ve configured, you just clone a prototype instead of constructing a new object from scratch.
+### Problem
 
-Wikipedia says
-> The prototype pattern is a creational design pattern in software development. It is used when the type of objects to create is determined by a prototypical instance, which is cloned to produce new objects.
+### Intent
+* Specify the kinds of objects to create using a prototypical instance, and create new objects by copying this prototype.
+* Co-opt one instance of a class for use as a breeder of all future instances.
+* The `new` operator considered harmful.
 
-In short, it allows you to create a copy of an existing object and modify it to your needs, instead of going through the trouble of creating an object from scratch and setting it up.
+### Discussion
 
-**When to use?**
+Declare an abstract base class that specifies a pure virtual "clone" method, and, maintains a dictionary of all "cloneable" concrete derived classes. Any class that needs a "polymorphic constructor" capability: derives itself from the abstract base class, registers its prototypical instance, and implements the clone() operation.
 
-When an object is required that is similar to existing object or when the creation would be expensive as compared to cloning.
-When your objects have dozens of fields and hundreds of possible configurations, cloning them might serve as an alternative to subclassing.
-Instead of instantiating a subclass that matches some configuration, the client can simply look for an appropriate prototype and clone it.
+The client then, instead of writing code that invokes the "new" operator on a hard-wired class name, calls a "clone" operation on the abstract base class, supplying a string or enumerated data type that designates the particular concrete derived class desired.
 
-Use the Prototype pattern when your code shouldn’t depend on the concrete classes of objects that you need to copy. This happens a lot when 
-your code works with objects passed to you from 3rd-party code via some interface. The concrete classes of these objects are unknown, and you 
-couldn’t depend on them even if you wanted to.
+### Check list
+1. Add a clone() method to the existing "product" hierarchy.
+1. Design a "registry" that maintains a cache of prototypical objects. The registry could be encapsulated in a new Factory class, or in the base class of the "product" hierarchy.
+1. Design a factory method that: may (or may not) accept arguments, finds the correct prototype object, calls clone() on that object, and returns the result.
+1. The client replaces all references to the `new` operator with calls to the factory method.
 
 💍 Singleton
 ------------
-Real world example
-> Ensure that a class has just a single instance. Why would anyone want to control how many instances a class has? The most common reason for this is to control access to some shared resource—for example, a database or a file.
+### Problem
+Application needs one, and only one, instance of an object. Additionally, lazy initialization and global access are necessary.
 
-In plain words
-> Ensures that only one object of a particular class is ever created.
+### Intent
+* Ensure a class has only one instance, and provide a global point of access to it.
+* Encapsulated "just-in-time initialization" or "initialization on first use".
 
-Wikipedia says
-> In software engineering, the singleton pattern is a software design pattern that restricts the instantiation of a class to one object. This is useful when exactly one object is needed to coordinate actions across the system.
+### Discussion
 
-Use the Singleton pattern when a class in your program should have just a single instance available to all clients; for example, a single database object shared by different parts of the program.
-Singleton pattern is actually considered an anti-pattern and overuse of it should be avoided. It is not necessarily bad and could have some valid use-cases but should be used with caution because it introduces a global state in your application and change to it in one place could affect in the other areas and it could become pretty difficult to debug. The other bad thing about them is it makes your code tightly coupled plus mocking the singleton could be difficult.
+Make the class of the single instance object responsible for creation, initialization, access, and enforcement. Declare the instance as a private static data member. Provide a public static member function that encapsulates all initialization code, and provides access to the instance.
+
+The client calls the accessor function (using the class name and scope resolution operator) whenever a reference to the single instance is required.
+
+Singleton should be considered only if all three of the following criteria are satisfied:
+
+* Ownership of the single instance cannot be reasonably assigned
+* Lazy initialization is desirable
+* Global access is not otherwise provided for
+
+If ownership of the single instance, when and how initialization occurs, and global access are not issues, Singleton is not sufficiently interesting.
+
+The Singleton pattern can be extended to support access to an application-specific number of instances.
+
+The "static member function accessor" approach will not support subclassing of the Singleton class. If subclassing is desired, refer to the discussion in the book.
+
+Deleting a Singleton class/instance is a non-trivial design problem. See "To Kill A Singleton" by John Vlissides for a discussion.
+
+### Check list
+1. Define a private static attribute in the "single instance" class.
+1. Define a public static accessor function in the class.
+1. Do "lazy initialization" (creation on first use) in the accessor function.
+1. Define all constructors to be protected or private.
+1. Clients may only use the accessor function to manipulate the Singleton.

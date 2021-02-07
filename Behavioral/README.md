@@ -21,1038 +21,306 @@ Wikipedia says
 🔗 Chain of Responsibility
 -----------------------
 
-Real world example
-> For example, you have three payment methods (`A`, `B` and `C`) setup in your account; each having a different amount in it. `A` has 100 USD, `B` has 300 USD and `C` having 1000 USD and the preference for payments is chosen as `A` then `B` then `C`. You try to purchase something that is worth 210 USD. Using Chain of Responsibility, first of all account `A` will be checked if it can make the purchase, if yes purchase will be made and the chain will be broken. If not, request will move forward to account `B` checking for amount if yes chain will be broken otherwise the request will keep forwarding till it finds the suitable handler. Here `A`, `B` and `C` are links of the chain and the whole phenomenon is Chain of Responsibility.
+### Problem
+There is a potentially variable number of "handler" or "processing element" or "node" objects, and a stream of requests that must be handled. Need to efficiently process the requests without hard-wiring handler relationships and precedence, or request-to-handler mappings.
 
-In plain words
-> It helps building a chain of objects. Request enters from one end and keeps going from object to object till it finds the suitable handler.
+### Intent
+* Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it.
+* Launch-and-leave requests with a single processing pipeline that contains many possible handlers.
+* An object-oriented linked list with recursive traversal.
 
-Wikipedia says
-> In object-oriented design, the chain-of-responsibility pattern is a design pattern consisting of a source of command objects and a series of processing objects. Each processing object contains logic that defines the types of command objects that it can handle; the rest are passed to the next processing object in the chain.
+### Discussion
 
-**Programmatic Example**
+Encapsulate the processing elements inside a "pipeline" abstraction; and have clients "launch and leave" their requests at the entrance to the pipeline.
 
-Translating our account example above. First of all we have a base account having the logic for chaining the accounts together and some accounts
+The pattern chains the receiving objects together, and then passes any request messages from object to object until it reaches an object capable of handling the message. The number and type of handler objects isn't known a priori, they can be configured dynamically. The chaining mechanism uses recursive composition to allow an unlimited number of handlers to be linked.
 
-```C#
-abstract class Account
-{
-  private Account mSuccessor;
-  protected decimal mBalance;
+Chain of Responsibility simplifies object interconnections. Instead of senders and receivers maintaining references to all candidate receivers, each sender keeps a single reference to the head of the chain, and each receiver keeps a single reference to its immediate successor in the chain.
 
-  public void SetNext(Account account)
-  {
-    mSuccessor = account;
-  }
+Make sure there exists a "safety net" to "catch" any requests which go unhandled.
 
-  public void Pay(decimal amountTopay)
-  {
-    if (CanPay(amountTopay))
-    {
-      Console.WriteLine($"Paid {amountTopay:c} using {this.GetType().Name}.");
-    }
-    else if (this.mSuccessor != null)
-    {
-      Console.WriteLine($"Cannot pay using {this.GetType().Name}. Proceeding..");
-      mSuccessor.Pay(amountTopay);
-    }
-    else
-    {
-      throw new Exception("None of the accounts have enough balance");
-    }
-  }
-  private bool CanPay(decimal amount)
-  {
-    return mBalance >= amount;
-  }
-}
+Do not use Chain of Responsibility when each request is only handled by one handler, or, when the client object knows which service object should handle the request.
 
-class Bank : Account
-{
-  public Bank(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
+### Check list
+1. The base class maintains a "next" pointer.
+1. Each derived class implements its contribution for handling the request.
+1. If the request needs to be "passed on", then the derived class "calls back" to the base class, which delegates to the "next" pointer.
+1. The client (or some third party) creates and links the chain (which may include a link from the last node to the root node).
+1. The client "launches and leaves" each request with the root of the chain.
+1. Recursive delegation produces the illusion of magic.
 
-class Paypal : Account
-{
-  public Paypal(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
-
-class Bitcoin : Account
-{
-  public Bitcoin(decimal balance)
-  {
-    this.mBalance = balance;
-  }
-}
-```
-
-Now let's prepare the chain using the links defined above (i.e. Bank, Paypal, Bitcoin)
-
-```C#
-// Let's prepare a chain like below
-//      $bank->$paypal->$bitcoin
-//
-// First priority bank
-//      If bank can't pay then paypal
-//      If paypal can't pay then bit coin
-var bank = new Bank(100);          // Bank with balance 100
-var paypal = new Paypal(200);      // Paypal with balance 200
-var bitcoin = new Bitcoin(300);    // Bitcoin with balance 300
-
-bank.SetNext(paypal);
-paypal.SetNext(bitcoin);
-
-// Let's try to pay using the first priority i.e. bank
-bank.Pay(259);
-// Output will be
-// ==============
-// Cannot pay using bank. Proceeding ..
-// Cannot pay using paypal. Proceeding ..:
-// Paid 259 using Bitcoin!
-```
 
 👮 Command
 -------
 
-Real world example
-> A generic example would be you ordering food at a restaurant. You (i.e. `Client`) ask the waiter (i.e. `Invoker`) to bring some food (i.e. `Command`) and waiter simply forwards the request to Chef (i.e. `Receiver`) who has the knowledge of what and how to cook.
-> Another example would be you (i.e. `Client`) switching on (i.e. `Command`) the television (i.e. `Receiver`) using a remote control (`Invoker`).
+### Problem
+Need to issue requests to objects without knowing anything about the operation being requested or the receiver of the request.
 
-In plain words
-> Allows you to encapsulate actions in objects. The key idea behind this pattern is to provide the means to decouple client from receiver.
+### Intent
+* Encapsulate a request as an object, thereby letting you parametrize clients with different requests, queue or log requests, and support undoable operations.
+* Promote "invocation of a method on an object" to full object status
+* An object-oriented callback
 
-Wikipedia says
-> In object-oriented programming, the command pattern is a behavioral design pattern in which an object is used to encapsulate all information needed to perform an action or trigger an event at a later time. This information includes the method name, the object that owns the method and values for the method parameters.
+### Discussion
 
-**Programmatic Example**
+Command decouples the object that invokes the operation from the one that knows how to perform it. To achieve this separation, the designer creates an abstract base class that maps a receiver (an object) with an action (a pointer to a member function). The base class contains an execute() method that simply calls the action on the receiver.
 
-First of all we have the receiver that has the implementation of every action that could be performed
-```C#
-// Receiver
-class Bulb
-{
-  public void TurnOn()
-  {
-    Console.WriteLine("Bulb has been lit");
-  }
+All clients of Command objects treat each object as a "black box" by simply invoking the object's virtual execute() method whenever the client requires the object's "service".
 
-  public void TurnOff()
-  {
-    Console.WriteLine("Darkness!");
-  }
-}
-```
-then we have an interface that each of the commands are going to implement and then we have a set of commands
-```C#
-interface ICommand
-{
-  void Execute();
-  void Undo();
-  void Redo();
-}
+A Command class holds some subset of the following: an object, a method to be applied to the object, and the arguments to be passed when the method is applied. The Command's "execute" method then causes the pieces to come together.
 
-// Command
-class TurnOn : ICommand
-{
-  private Bulb mBulb;
+Sequences of Command objects can be assembled into composite (or macro) commands.
 
-  public TurnOn(Bulb bulb)
-  {
-    mBulb = bulb ?? throw new ArgumentNullException("Bulb", "Bulb cannot be null");
-  }
-
-  public void Execute()
-  {
-    mBulb.TurnOn();
-  }
-
-  public void Undo()
-  {
-    mBulb.TurnOff();
-  }
-
-  public void Redo()
-  {
-    Execute();
-  }
-}
-
-class TurnOff : ICommand
-{
-  private Bulb mBulb;
-
-  public TurnOff(Bulb bulb)
-  {
-    mBulb = bulb ?? throw new ArgumentNullException("Bulb", "Bulb cannot be null");
-  }
-
-  public void Execute()
-  {
-    mBulb.TurnOff();
-  }
-
-  public void Undo()
-  {
-    mBulb.TurnOn();
-  }
-
-  public void Redo()
-  {
-    Execute();
-  }
-}
-```
-Then we have an `Invoker` with whom the client will interact to process any commands
-```C#
-// Invoker
-class RemoteControl
-{
-  public void Submit(ICommand command)
-  {
-    command.Execute();
-  }
-}
-```
-Finally let's see how we can use it in our client
-```C#
-  var bulb = new Bulb();
-
-  var turnOn = new TurnOn(bulb);
-  var turnOff = new TurnOff(bulb);
-
-  var remote = new RemoteControl();
-  remote.Submit(turnOn); // Bulb has been lit!
-  remote.Submit(turnOff); // Darkness!
-
-  Console.ReadLine();
-```
-
-Command pattern can also be used to implement a transaction based system. Where you keep maintaining the history of commands as soon as you execute them. If the final command is successfully executed, all good otherwise just iterate through the history and keep executing the `undo` on all the executed commands.
+### Check list
+1. Define a Command interface with a method signature like execute().
+1. Create one or more derived classes that encapsulate some subset of the following: a "receiver" object, the method to invoke, the arguments to pass.
+1. Instantiate a Command object for each deferred execution request.
+1. Pass the Command object from the creator (aka sender) to the invoker (aka receiver).
+1. The invoker decides when to execute().
 
 ➿ Iterator
 --------
 
-Real world example
-> An old radio set will be a good example of iterator, where user could start at some channel and then use next or previous buttons to go through the respective channels. Or take an example of MP3 player or a TV set where you could press the next and previous buttons to go through the consecutive channels or in other words they all provide an interface to iterate through the respective channels, songs or radio stations.
+### Problem
+Need to "abstract" the traversal of wildly different data structures so that algorithms can be defined that are capable of interfacing with each transparently.
 
-In plain words
-> It presents a way to access the elements of an object without exposing the underlying presentation.
+### Intent
+* Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+* The C++ / Java / C# standard library abstraction that makes it possible to decouple collection classes and algorithms.
+* Promote to "full object status" the traversal of a collection.
+* Polymorphic traversal
 
-Wikipedia says
-> In object-oriented programming, the iterator pattern is a design pattern in which an iterator is used to traverse a container and access the container's elements. The iterator pattern decouples algorithms from containers; in some cases, algorithms are necessarily container-specific and thus cannot be decoupled.
+### Discussion
 
-**Programmatic example**
+"An aggregate object such as a list should give you a way to access its elements without exposing its internal structure. Moreover, you might want to traverse the list in different ways, depending on what you need to accomplish. But you probably don't want to bloat the List interface with operations for different traversals, even if you could anticipate the ones you'll require. You might also need to have more than one traversal pending on the same list." And, providing a uniform interface for traversing many types of aggregate objects (i.e. polymorphic iteration) might be valuable.
 
-In C# it can be done by implementing IEnumerable<T>. Translating our radio statiIons example from above. First of all we have `RadioStation`
+The Iterator pattern lets you do all this. The key idea is to take the responsibility for access and traversal out of the aggregate object and put it into an Iterator object that defines a standard traversal protocol.
 
-```C#
-class RadioStation
-{
-  private float mFrequency;
+The Iterator abstraction is fundamental to an emerging technology called "generic programming". This strategy seeks to **explicitly separate the notion of "algorithm" from that of "data structure".** The motivation is to: promote component-based development, boost productivity, and reduce configuration management.
 
-  public RadioStation(float frequency)
-  {
-    mFrequency = frequency;
-  }
+As an example, if you wanted to support four data structures (array, binary tree, linked list, and hash table) and three algorithms (sort, find, and merge), a traditional approach would require four times three permutations to develop and maintain. Whereas, a generic programming approach would only require four plus three configuration items.
 
-  public float GetFrequecy()
-  {
-    return mFrequency;
-  }
-
-}
-
-```
-Then we have our iterator
-
-```C#
-class StationList : IEnumerable<RadioStation>
-{
-  List<RadioStation> mStations = new List<RadioStation>();
-
-  public RadioStation this[int index]
-  {
-    get { return mStations[index]; }
-    set { mStations.Insert(index, value); }
-  }
-
-  public void Add(RadioStation station)
-  {
-    mStations.Add(station);
-  }
-
-  public void Remove(RadioStation station)
-  {
-    mStations.Remove(station);
-  }
-
-  public IEnumerator<RadioStation> GetEnumerator()
-  {
-    return this.GetEnumerator();
-  }
-
-  IEnumerator IEnumerable.GetEnumerator()
-  {
-    //Use can switch to this internal collection if you do not want to transform
-    //return mStations.GetEnumerator();
-
-    //use this if you want to transform the object before rendering
-    foreach (var x in mStations)
-    {
-      yield return x;
-    }
-  }
-}
-```
-And then it can be used as
-```C#
-var stations = new StationList();
-var station1 = new RadioStation(89);
-stations.Add(station1);
-
-var station2 = new RadioStation(101);
-stations.Add(station2);
-
-var station3 = new RadioStation(102);
-stations.Add(station3);
-
-foreach(var x in stations)
-{
-  Console.Write(x.GetFrequecy());
-}
-
-var q = stations.Where(x => x.GetFrequecy() == 89).FirstOrDefault();
-Console.WriteLine(q.GetFrequecy());
-
-Console.ReadLine();
-```
+### Check list
+1. Add a create_iterator() method to the "collection" class, and grant the "iterator" class privileged access.
+1. Design an "iterator" class that can encapsulate traversal of the "collection" class.
+1. Clients ask the collection object to create an iterator object.
+1. Clients use the first(), is_done(), next(), and current_item() protocol to access the elements of the collection class.
 
 👽 Mediator
 ========
 
-Real world example
-> A general example would be when you talk to someone on your mobile phone, there is a network provider sitting between you and them and your conversation goes through it instead of being directly sent. In this case network provider is mediator.
+### Problem
+We want to design reusable components, but dependencies between the potentially reusable pieces demonstrates the "spaghetti code" phenomenon (trying to scoop a single serving results in an "all or nothing clump").
 
-In plain words
-> Mediator pattern adds a third party object (called mediator) to control the interaction between two objects (called colleagues). It helps reduce the coupling between the classes communicating with each other. Because now they don't need to have the knowledge of each other's implementation.
+### Intent
+* Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.
+* Design an intermediary to decouple many peers.
+* Promote the many-to-many relationships between interacting peers to "full object status".
 
-Wikipedia says
-> In software engineering, the mediator pattern defines an object that encapsulates how a set of objects interact. This pattern is considered to be a behavioral pattern due to the way it can alter the program's running behavior.
+### Discussion
 
-**Programmatic Example**
+In Unix, permission to access system resources is managed at three levels of granularity: world, group, and owner. A group is a collection of users intended to model some functional affiliation. Each user on the system can be a member of one or more groups, and each group can have zero or more users assigned to it.
 
-Here is the simplest example of a chat room (i.e. mediator) with users (i.e. colleagues) sending messages to each other.
+If we were to model this in software, we could decide to have User objects coupled to Group objects, and Group objects coupled to User objects. Then when changes occur, both classes and all their instances would be affected.
 
-First of all, we have the mediator i.e. the chat room
+An alternate approach would be to introduce "an additional level of indirection" - take the mapping of users to groups and groups to users, and make it an abstraction unto itself. This offers several advantages: Users and Groups are decoupled from one another, many mappings can easily be maintained and manipulated simultaneously, and the mapping abstraction can be extended in the future by defining derived classes.
 
-```C#
-interface IChatRoomMediator
-{
-  void ShowMessage(User user, string message);
-}
+Partitioning a system into many objects generally enhances reusability, but proliferating interconnections between those objects tend to reduce it again. The mediator object: encapsulates all interconnections, acts as the hub of communication, is responsible for controlling and coordinating the interactions of its clients, and promotes loose coupling by keeping objects from referring to each other explicitly.
 
-//Mediator
-class ChatRoom : IChatRoomMediator
-{
-  public void ShowMessage(User user, string message)
-  {
-    Console.WriteLine($"{DateTime.Now.ToString("MMMM dd, H:mm")} [{user.GetName()}]:{message}");
-  }
-}
-```
+The Mediator pattern promotes a "many-to-many relationship network" to "full object status". Modelling the inter-relationships with an object enhances encapsulation, and allows the behavior of those inter-relationships to be modified or extended through subclassing.
 
-Then we have our users i.e. colleagues
-```C#
-class User
-{
-  private string mName;
-  private IChatRoomMediator mChatRoom;
+An example where Mediator is useful is the design of a user and group capability in an operating system. A group can have zero or more users, and, a user can be a member of zero or more groups. The Mediator pattern provides a flexible and non-invasive way to associate and manage users and groups.
 
-  public User(string name, IChatRoomMediator chatroom)
-  {
-    mChatRoom = chatroom;
-    mName = name;
-  }
+### Check list
+1. Identify a collection of interacting objects that would benefit from mutual decoupling.
+1. Encapsulate those interactions in the abstraction of a new class.
+1. Create an instance of that new class and rework all "peer" objects to interact with the Mediator only.
+1. Balance the principle of decoupling with the principle of distributing responsibility evenly.
+1. Be careful not to create a "controller" or "god" object.
 
-  public string GetName()
-  {
-    return mName;
-  }
-
-  public void Send(string message)
-  {
-    mChatRoom.ShowMessage(this, message);
-  }
-}
-```
-And the usage
-```C#
-var mediator = new ChatRoom();
-
-var john = new User("John", mediator);
-var jane = new User("Jane", mediator);
-
-john.Send("Hi there!");
-jane.Send("Hey!");
-
-//April 14, 20:05[John]:Hi there!
-//April 14, 20:05[Jane]:Hey!
-```
 
 💾 Memento
 -------
-Real world example
-> Take the example of calculator (i.e. originator), where whenever you perform some calculation the last calculation is saved in memory (i.e. memento) so that you can get back to it and maybe get it restored using some action buttons (i.e. caretaker).
+### Problem
+Need to restore an object back to its previous state (e.g. "undo" or "rollback" operations).
 
-In plain words
-> Memento pattern is about capturing and storing the current state of an object in a manner that it can be restored later on in a smooth manner.
+### Intent
+* Without violating encapsulation, capture and externalize an object's internal state so that the object can be returned to this state later.
+* A magic cookie that encapsulates a "check point" capability.
+* Promote undo or rollback to full object status.
 
-Wikipedia says
-> The memento pattern is a software design pattern that provides the ability to restore an object to its previous state (undo via rollback).
+### Discussion
+The client requests a Memento from the source object when it needs to checkpoint the source object's state. The source object initializes the Memento with a characterization of its state. The client is the "care-taker" of the Memento, but only the source object can store and retrieve information from the Memento (the Memento is "opaque" to the client and all other objects). If the client subsequently needs to "rollback" the source object's state, it hands the Memento back to the source object for reinstatement.
 
-Usually useful when you need to provide some sort of undo functionality.
+An unlimited "undo" and "redo" capability can be readily implemented with a stack of Command objects and a stack of Memento objects.
 
-**Programmatic Example**
+The Memento design pattern defines three distinct roles:
+1. Originator - the object that knows how to save itself.
+1. Caretaker - the object that knows why and when the Originator needs to save and restore itself.
+1. Memento - the lock box that is written and read by the Originator, and shepherded by the Caretaker.
 
-Lets take an example of text editor which keeps saving the state from time to time and that you can restore if you want.
-
-First of all we have our memento object that will be able to hold the editor state
-
-```C#
-class EditorMemento
-{
-  private string mContent;
-
-  public EditorMemento(string content)
-  {
-    mContent = content;
-  }
-
-  public string Content
-  {
-    get
-    {
-      return mContent;
-    }
-  }
-}
-```
-
-Then we have our editor i.e. originator that is going to use memento object
-
-```C#
-class Editor {
-
-  private string mContent = string.Empty;
-  private EditorMemento memento;
-
-  public Editor()
-  {
-    memento = new EditorMemento(string.Empty);
-  }
-
-  public void Type(string words)
-  {
-    mContent = String.Concat(mContent," ", words);
-  }
-
-  public string Content
-  {
-    get
-    {
-      return mContent;
-    }
-  }
-
-  public void Save()
-  {
-    memento = new EditorMemento(mContent);
-  }
-
-  public void Restore()
-  {
-    mContent = memento.Content;
-  }
-}
-```
-
-And then it can be used as
-
-```C#
-var editor = new Editor();
-
-//Type some stuff
-editor.Type("This is the first sentence.");
-editor.Type("This is second.");
-
-// Save the state to restore to : This is the first sentence. This is second.
-editor.Save();
-
-//Type some more
-editor.Type("This is third.");
-
-//Output the content
-Console.WriteLine(editor.Content); // This is the first sentence. This is second. This is third.
-
-//Restoring to last saved state
-editor.Restore();
-
-Console.Write(editor.Content); // This is the first sentence. This is second
-
-```
+### Check list
+1. Identify the roles of “caretaker” and “originator”.
+1. Create a Memento class and declare the originator a friend.
+1. Caretaker knows when to "check point" the originator.
+1. Originator creates a Memento and copies its state to that Memento.
+1. Caretaker holds on to (but cannot peek into) the Memento.
+1. Caretaker knows when to "roll back" the originator.
+1. Originator reinstates itself using the saved state in the Memento.
 
 😎 Observer
 --------
-Real world example
-> A good example would be the job seekers where they subscribe to some job posting site and they are notified whenever there is a matching job opportunity.   
+### Problem
+A large monolithic design does not scale well as new graphing or monitoring requirements are levied.
 
-In plain words
-> Defines a dependency between objects so that whenever an object changes its state, all its dependents are notified.
+### Intent
+* Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+* Encapsulate the core (or common or engine) components in a Subject abstraction, and the variable (or optional or user interface) components in an Observer hierarchy.
+* The "View" part of Model-View-Controller.
 
-Wikipedia says
-> The observer pattern is a software design pattern in which an object, called the subject, maintains a list of its dependents, called observers, and notifies them automatically of any state changes, usually by calling one of their methods.
+### Discussion
 
-**Programmatic example**
+Define an object that is the "keeper" of the data model and/or business logic (the Subject). Delegate all "view" functionality to decoupled and distinct Observer objects. Observers register themselves with the Subject as they are created. Whenever the Subject changes, it broadcasts to all registered Observers that it has changed, and each Observer queries the Subject for that subset of the Subject's state that it is responsible for monitoring.
 
-Translating our example from above. First of all we have job seekers that need to be notified for a job posting
-```C#
-class JobPost
-{
-  public string Title { get; private set; }
+This allows the number and "type" of "view" objects to be configured dynamically, instead of being statically specified at compile-time.
 
-  public JobPost(string title)
-  {
-    Title = title;
-  }
-}
-class JobSeeker : IObserver<JobPost>
-{
-  public string Name { get; private set; }
+The protocol described above specifies a "pull" interaction model. Instead of the Subject "pushing" what has changed to all Observers, each Observer is responsible for "pulling" its particular "window of interest" from the Subject. The "push" model compromises reuse, while the "pull" model is less efficient.
 
-  public JobSeeker(string name)
-  {
-    Name = name;
-  }
+Issues that are discussed, but left to the discretion of the designer, include: implementing event compression (only sending a single change broadcast after a series of consecutive changes has occurred), having a single Observer monitoring multiple Subjects, and ensuring that a Subject notify its Observers when it is about to go away.
 
-  //Method is not being called by JobPostings class currently
-  public void OnCompleted()
-  {
-    //No Implementation
-  }
+The Observer pattern captures the lion's share of the Model-View-Controller architecture that has been a part of the Smalltalk community for years.
 
-  //Method is not being called by JobPostings class currently
-  public void OnError(Exception error)
-  {
-    //No Implementation
-  }
-
-  public void OnNext(JobPost value)
-  {
-    Console.WriteLine($"Hi {Name} ! New job posted: {value.Title}");
-  }
-}
-```
-Then we have our job postings to which the job seekers will subscribe
-```C#
-class JobPostings : IObservable<JobPost>
-{
-  private List<IObserver<JobPost>> mObservers;
-  private List<JobPost> mJobPostings;
-
-  public JobPostings()
-  {
-    mObservers = new List<IObserver<JobPost>>();
-    mJobPostings = new List<JobPost>();
-  }
-
-  public IDisposable Subscribe(IObserver<JobPost> observer)
-  {
-    // Check whether observer is already registered. If not, add it
-    if (!mObservers.Contains(observer))
-    {
-      mObservers.Add(observer);
-    }
-    return new Unsubscriber<JobPost>(mObservers, observer);
-  }
-
-  private void Notify(JobPost jobPost)
-  {
-    foreach(var observer in mObservers)
-    {
-      observer.OnNext(jobPost);
-    }
-  }
-
-  public void AddJob(JobPost jobPost)
-  {
-    mJobPostings.Add(jobPost);
-    Notify(jobPost);
-  }
-
-}
-
-internal class Unsubscriber<JobPost> : IDisposable
-{
-  private List<IObserver<JobPost>> mObservers;
-  private IObserver<JobPost> mObserver;
-
-  internal Unsubscriber(List<IObserver<JobPost>> observers, IObserver<JobPost> observer)
-  {
-    this.mObservers = observers;
-    this.mObserver = observer;
-  }
-
-  public void Dispose()
-  {
-    if (mObservers.Contains(mObserver))
-      mObservers.Remove(mObserver);
-  }
-}
-```
-Then it can be used as
-```C#
-//Create Subscribers
-var johnDoe = new JobSeeker("John Doe");
-var janeDoe = new JobSeeker("Jane Doe");
-
-//Create publisher and attch subscribers
-var jobPostings = new JobPostings();
-jobPostings.Subscribe(johnDoe);
-jobPostings.Subscribe(janeDoe);
-
-//Add a new job and see if subscribers get notified
-jobPostings.AddJob(new JobPost("Software Engineer"));
-
-//Output
-// Hi John Doe! New job posted: Software Engineer
-// Hi Jane Doe! New job posted: Software Engineer
-
-Console.ReadLine();
-```
+### Check list
+1. Differentiate between the core (or independent) functionality and the optional (or dependent) functionality.
+1. Model the independent functionality with a "subject" abstraction.
+1. Model the dependent functionality with an "observer" hierarchy.
+1. The Subject is coupled only to the Observer base class.
+1. The client configures the number and type of Observers.
+1. Observers register themselves with the Subject.
+1. The Subject broadcasts events to all registered Observers.
+1. The Subject may "push" information at the Observers, or, the Observers may "pull" the information they need from the Subject.
 
 🏃 Visitor
 -------
-Real world example
-> Consider someone visiting Dubai. They just need a way (i.e. visa) to enter Dubai. After arrival, they can come and visit any place in Dubai on their own without having to ask for permission or to do some leg work in order to visit any place here; just let them know of a place and they can visit it. Visitor pattern lets you do just that, it helps you add places to visit so that they can visit as much as they can without having to do any legwork.
+### Problem
+Many distinct and unrelated operations need to be performed on node objects in a heterogeneous aggregate structure. You want to avoid "polluting" the node classes with these operations. And, you don't want to have to query the type of each node and cast the pointer to the correct type before performing the desired operation.
 
-In plain words
-> Visitor pattern lets you add further operations to objects without having to modify them.
+### Intent
+* Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements on which it operates.
+* The classic technique for recovering lost type information.
+* Do the right thing based on the type of two objects.
+* Double dispatch
 
-Wikipedia says
-> In object-oriented programming and software engineering, the visitor design pattern is a way of separating an algorithm from an object structure on which it operates. A practical result of this separation is the ability to add new operations to existing object structures without modifying those structures. It is one way to follow the open/closed principle.
+### Discussion
+Visitor's primary purpose is to abstract functionality that can be applied to an aggregate hierarchy of "element" objects. The approach encourages designing lightweight Element classes - because processing functionality is removed from their list of responsibilities. New functionality can easily be added to the original inheritance hierarchy by creating a new Visitor subclass.
 
-**Programmatic example**
+Visitor implements "double dispatch". OO messages routinely manifest "single dispatch" - the operation that is executed depends on: the name of the request, and the type of the receiver. In "double dispatch", the operation executed depends on: the name of the request, and the type of TWO receivers (the type of the Visitor and the type of the element it visits).
 
-Let's take an example of a zoo simulation where we have several different kinds of animals and we have to make them Sound. Let's translate this using visitor pattern
+The implementation proceeds as follows. Create a Visitor class hierarchy that defines a pure virtual visit() method in the abstract base class for each concrete derived class in the aggregate node hierarchy. Each visit() method accepts a single argument - a pointer or reference to an original Element derived class.
 
-```C#
-// Visitee
-interface IAnimal
-{
-  void Accept(IAnimalOperation operation);
-}
+Each operation to be supported is modelled with a concrete derived class of the Visitor hierarchy. The visit() methods declared in the Visitor base class are now defined in each derived subclass by allocating the "type query and cast" code in the original implementation to the appropriate overloaded visit() method.
 
-// Visitor
-interface IAnimalOperation
-{
-  void VisitMonkey(Monkey monkey);
-  void VisitLion(Lion lion);
-  void VisitDolphin(Dolphin dolphin);
-}
-```
-Then we have our implementations for the animals
-```C#
-class Monkey : IAnimal
-{
-  public void Shout()
-  {
-    Console.WriteLine("Oooh o aa aa!");
-  }
+Add a single pure virtual accept() method to the base class of the Element hierarchy. accept() is defined to receive a single argument - a pointer or reference to the abstract base class of the Visitor hierarchy.
 
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitMonkey(this);
-  }
-}
+Each concrete derived class of the Element hierarchy implements the accept() method by simply calling the visit() method on the concrete derived instance of the Visitor hierarchy that it was passed, passing its "this" pointer as the sole argument.
 
-class Lion : IAnimal
-{
-  public void Roar()
-  {
-    Console.WriteLine("Roaar!");
-  }
+Everything for "elements" and "visitors" is now set-up. When the client needs an operation to be performed, (s)he creates an instance of the Visitor object, calls the accept() method on each Element object, and passes the Visitor object.
 
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitLion(this);
-  }
-}
+The accept() method causes flow of control to find the correct Element subclass. Then when the visit() method is invoked, flow of control is vectored to the correct Visitor subclass. accept() dispatch plus visit() dispatch equals double dispatch.
 
-class Dolphin : IAnimal
-{
-  public void Speak()
-  {
-    Console.WriteLine("Tuut tittu tuutt!");
-  }
+The Visitor pattern makes adding new operations (or utilities) easy - simply add a new Visitor derived class. But, if the subclasses in the aggregate node hierarchy are not stable, keeping the Visitor subclasses in sync requires a prohibitive amount of effort.
 
-  public void Accept(IAnimalOperation operation)
-  {
-      operation.VisitDolphin(this);
-  }
-}
-```
-Let's implement our visitor
-```C#
-class Speak : IAnimalOperation
-{
-  public void VisitDolphin(Dolphin dolphin)
-  {
-    dolphin.Speak();
-  }
+An acknowledged objection to the Visitor pattern is that is represents a regression to functional decomposition - separate the algorithms from the data structures. While this is a legitimate interpretation, perhaps a better perspective/rationale is the goal of promoting non-traditional behavior to full object status.
 
-  public void VisitLion(Lion lion)
-  {
-    lion.Roar();
-  }
-
-  public void VisitMonkey(Monkey monkey)
-  {
-    monkey.Shout();
-  }
-}
-```
-
-And then it can be used as
-```C#
-var monkey = new Monkey();
-var lion = new Lion();
-var dolphin = new Dolphin();
-
-var speak = new Speak();
-
-monkey.Accept(speak);    // Ooh oo aa aa!
-lion.Accept(speak);      // Roaaar!
-dolphin.Accept(speak);   // Tuut tutt tuutt!
-
-```
-We could have done this simply by having an inheritance hierarchy for the animals but then we would have to modify the animals whenever we would have to add new actions to animals. But now we will not have to change them. For example, let's say we are asked to add the jump behavior to the animals, we can simply add that by creating a new visitor i.e.
-
-```C#
-class Jump : IAnimalOperation
-{
-  public void VisitDolphin(Dolphin dolphin)
-  {
-    Console.WriteLine("Walked on water a little and disappeared!");
-  }
-
-  public void VisitLion(Lion lion)
-  {
-    Console.WriteLine("Jumped 7 feet! Back on the ground!");
-  }
-
-  public void VisitMonkey(Monkey monkey)
-  {
-    Console.WriteLine("Jumped 20 feet high! on to the tree!");
-  }
-}
-```
-And for the usage
-```C#
-var jump = new Jump();
-
-monkey.Accept(speak);   // Ooh oo aa aa!
-monkey.Accept(jump);    // Jumped 20 feet high! on to the tree!
-
-lion.Accept(speak);     // Roaaar!
-lion.Accept(jump);      // Jumped 7 feet! Back on the ground!
-
-dolphin.Accept(speak);  // Tuut tutt tuutt!
-dolphin.Accept(jump);   // Walked on water a little and disappeared
-
-```
+### Check list
+1. Confirm that the current hierarchy (known as the Element hierarchy) will be fairly stable and that the public interface of these classes is sufficient for the access the Visitor classes will require. If these conditions are not met, then the Visitor pattern is not a good match.
+1. Create a Visitor base class with a visit(ElementXxx) method for each Element derived type.
+1. Add an accept(Visitor) method to the Element hierarchy. The implementation in each Element derived class is always the same – accept( Visitor v ) { v.visit( this ); }. Because of cyclic dependencies, the declaration of the Element and Visitor classes will need to be interleaved.
+1. The Element hierarchy is coupled only to the Visitor base class, but the Visitor hierarchy is coupled to each Element derived class. If the stability of the Element hierarchy is low, and the stability of the Visitor hierarchy is high; consider swapping the 'roles' of the two hierarchies.
+1. Create a Visitor derived class for each "operation" to be performed on Element objects. visit() implementations will rely on the Element's public interface.
+1. The client creates Visitor objects and passes each to Element objects by calling accept().
 
 💡 Strategy
 --------
 
-Real world example
-> Consider the example of sorting, we implemented bubble sort but the data started to grow and bubble sort started getting very slow. In order to tackle this we implemented Quick sort. But now although the quick sort algorithm was doing better for large datasets, it was very slow for smaller datasets. In order to handle this we implemented a strategy where for small datasets, bubble sort will be used and for larger, quick sort.
+### Problem
+One of the dominant strategies of object-oriented design is the "open-closed principle".
 
-In plain words
-> Strategy pattern allows you to switch the algorithm or strategy based upon the situation.
+Figure demonstrates how this is routinely achieved - encapsulate interface details in a base class, and bury implementation details in derived classes. Clients can then couple themselves to an interface, and not have to experience the upheaval associated with change: no impact when the number of derived classes changes, and no impact when the implementation of a derived class changes.
 
-Wikipedia says
-> In computer programming, the strategy pattern (also known as the policy pattern) is a behavioural software design pattern that enables an algorithm's behavior to be selected at runtime.
+A generic value of the software community for years has been, "maximize cohesion and minimize coupling". The object-oriented design approach shown in figure is all about minimizing coupling. Since the client is coupled only to an abstraction (i.e. a useful fiction), and not a particular realization of that abstraction, the client could be said to be practicing "abstract coupling" . an object-oriented variant of the more generic exhortation "minimize coupling".
 
-**Programmatic example**
+A more popular characterization of this "abstract coupling" principle is "Program to an interface, not an implementation".
 
-Translating our example from above. First of all we have our strategy interface and different strategy implementations
+Clients should prefer the "additional level of indirection" that an interface (or an abstract base class) affords. The interface captures the abstraction (i.e. the "useful fiction") the client wants to exercise, and the implementations of that interface are effectively hidden.
 
-```C#
-interface ISortStrategy
-{
-  List<int> Sort(List<int> dataset);
-}
+### Intent
+* Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from the clients that use it.
+* Capture the abstraction in an interface, bury implementation details in derived classes.
 
-class BubbleSortStrategy : ISortStrategy
-{
-  public List<int> Sort(List<int> dataset)
-  {
-    Console.WriteLine("Sorting using Bubble Sort !");
-    return dataset;
-  }
-}
+### Discussion
 
-class QuickSortStrategy : ISortStrategy
-{
-  public List<int> Sort(List<int> dataset)
-  {
-    Console.WriteLine("Sorting using Quick Sort !");
-    return dataset;
-  }
-}
-```
-
-And then we have our client that is going to use any strategy
-```C#
-class Sorter
-{
-  private readonly ISortStrategy mSorter;
-
-  public Sorter(ISortStrategy sorter)
-  {
-    mSorter = sorter;
-  }
-
-  public List<int> Sort(List<int> unSortedList)
-  {
-    return mSorter.Sort(unSortedList);
-  }
-}
-```
-And it can be used as
-```C#
-var unSortedList = new List<int> { 1, 10, 2, 16, 19 };
-
-var sorter = new Sorter(new BubbleSortStrategy());
-sorter.Sort(unSortedList); // // Output : Sorting using Bubble Sort !
-
-sorter = new Sorter(new QuickSortStrategy());
-sorter.Sort(unSortedList); // // Output : Sorting using Quick Sort !
-```
+### Check list
+1. Identify an algorithm (i.e. a behavior) that the client would prefer to access through a "flex point".
+1. Specify the signature for that algorithm in an interface.
+1. Bury the alternative implementation details in derived classes.
+1. Clients of the algorithm couple themselves to the interface.
 
 💢 State
 -----
-Real world example
-> Imagine you are using some drawing application, you choose the paint brush to draw. Now the brush changes its behavior based on the selected color i.e. if you have chosen red color it will draw in red, if blue then it will be in blue etc.  
+### Problem
+A monolithic object's behavior is a function of its state, and it must change its behavior at run-time depending on that state. Or, an application is characterized by large and numerous case statements that vector flow of control based on the state of the application.
 
-In plain words
-> It lets you change the behavior of a class when the state changes.
+### Intent
+* Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
+* An object-oriented state machine
+* wrapper + polymorphic wrappee + collaboration
 
-Wikipedia says
-> The state pattern is a behavioral software design pattern that implements a state machine in an object-oriented way. With the state pattern, a state machine is implemented by implementing each individual state as a derived class of the state pattern interface, and implementing state transitions by invoking methods defined by the pattern's superclass.
-> The state pattern can be interpreted as a strategy pattern which is able to switch the current strategy through invocations of methods defined in the pattern's interface.
+### Discussion
 
-**Programmatic example**
+The State pattern is a solution to the problem of how to make behavior depend on state.
 
-Let's take an example of text editor, it lets you change the state of text that is typed i.e. if you have selected bold, it starts writing in bold, if italic then in italics etc.
+* Define a "context" class to present a single interface to the outside world.
+* Define a State abstract base class.
+* Represent the different "states" of the state machine as derived classes of the State base class.
+* Define state-specific behavior in the appropriate State derived classes.
+* Maintain a pointer to the current "state" in the "context" class.
+* To change the state of the state machine, change the current "state" pointer.
+* The State pattern does not specify where the state transitions will be defined. The choices are two: the "context" object, or each individual State derived class. The advantage of the latter option is ease of adding new State derived classes. The disadvantage is each State derived class has knowledge of (coupling to) its siblings, which introduces dependencies between subclasses.
 
-First of all we have our state interface and some state implementations
+A table-driven approach to designing finite state machines does a good job of specifying state transitions, but it is difficult to add actions to accompany the state transitions. The pattern-based approach uses code (instead of data structures) to specify state transitions, but it does a good job of accommodating state transition actions.
 
-```C#
-interface IWritingState {
-
-  void Write(string words);
-
-}
-
-class UpperCase : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words.ToUpper());
-  }
-}
-
-class LowerCase : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words.ToLower());
-  }
-}
-
-class DefaultText : IWritingState
-{
-  public void Write(string words)
-  {
-    Console.WriteLine(words);
-  }
-}
-```
-Then we have our editor
-```C#
-class TextEditor {
-
-  private IWritingState mState;
-
-  public TextEditor()
-  {
-    mState = new DefaultText();
-  }
-
-  public void SetState(IWritingState state)
-  {
-    mState = state;
-  }
-
-  public void Type(string words)
-  {
-    mState.Write(words);
-  }
-
-}
-```
-And then it can be used as
-```C#
-var editor = new TextEditor();
-
-editor.Type("First line");
-
-editor.SetState(new UpperCase());
-
-editor.Type("Second Line");
-editor.Type("Third Line");
-
-editor.SetState(new LowerCase());
-
-editor.Type("Fourth Line");
-editor.Type("Fifthe Line");
-
-// Output:
-// First line
-// SECOND LINE
-// THIRD LINE
-// fourth line
-// fifth line
-```
+### Check list
+1. Identify an existing class, or create a new class, that will serve as the "state machine" from the client's perspective. That class is the "wrapper" class.
+1. Create a State base class that replicates the methods of the state machine interface. Each method takes one additional parameter: an instance of the wrapper class. The State base class specifies any useful "default" behavior.
+1. Create a State derived class for each domain state. These derived classes only override the methods they need to override.
+1. The wrapper class maintains a "current" State object.
+1. All client requests to the wrapper class are simply delegated to the current State object, and the wrapper object's this pointer is passed.
+1. The State methods change the "current" state in the wrapper object as appropriate.
 
 📒 Template Method
 ---------------
 
-Real world example
-> Suppose we are getting some house built. The steps for building might look like
-> - Prepare the base of house
-> - Build the walls
-> - Add roof
-> - Add other floors
+### Problem
+Two different components have significant similarities, but demonstrate no reuse of common interface or implementation. If a change common to both components becomes necessary, duplicate effort must be expended.
 
-> The order of these steps could never be changed i.e. you can't build the roof before building the walls etc but each of the steps could be modified for example walls can be made of wood or polyester or stone.
+### Intent
+* Define the skeleton of an algorithm in an operation, deferring some steps to client subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.
+* Base class declares algorithm 'placeholders', and derived classes implement the placeholders.
 
-In plain words
-> Template method defines the skeleton of how a certain algorithm could be performed, but defers the implementation of those steps to the children classes.
+### Discussion
+The component designer decides which steps of an algorithm are invariant (or standard), and which are variant (or customizable). The invariant steps are implemented in an abstract base class, while the variant steps are either given a default implementation, or no implementation at all. The variant steps represent "hooks", or "placeholders", that can, or must, be supplied by the component's client in a concrete derived class.
 
-Wikipedia says
-> In software engineering, the template method pattern is a behavioral design pattern that defines the program skeleton of an algorithm in an operation, deferring some steps to subclasses. It lets one redefine certain steps of an algorithm without changing the algorithm's structure.
+The component designer mandates the required steps of an algorithm, and the ordering of the steps, but allows the component client to extend or replace some number of these steps.
 
-**Programmatic Example**
+Template Method is used prominently in frameworks. Each framework implements the invariant pieces of a domain's architecture, and defines "placeholders" for all necessary or interesting client customization options. In so doing, the framework becomes the "center of the universe", and the client customizations are simply "the third rock from the sun". This inverted control structure has been affectionately labelled "the Hollywood principle" - "don't call us, we'll call you".
 
-Imagine we have a build tool that helps us test, lint, build, generate build reports (i.e. code coverage reports, linting report etc) and deploy our app on the test server.
-
-First of all we have our base class that specifies the skeleton for the build algorithm
-```C#
-abstract class Builder
-{
-    // Template method
-    public void Build()
-    {
-      Test();
-      Lint();
-      Assemble();
-      Deploy();
-    }
-
-    abstract public void Test();
-    abstract public void Lint();
-    abstract public void Assemble();
-    abstract public void Deploy();
-}
-```
-
-Then we can have our implementations
-
-```C#
-class AndroidBuilder : Builder
-{
-  public override void Assemble()
-  {
-    Console.WriteLine("Assembling the android build");
-  }
-
-  public override void Deploy()
-  {
-    Console.WriteLine("Deploying android build to server");
-  }
-
-  public override void Lint()
-  {
-    Console.WriteLine("Linting the android code");
-  }
-
-  public override void Test()
-  {
-    Console.WriteLine("Running android tests");
-  }
-}
-
-
-class IosBuilder : Builder
-{
-  public override void Assemble()
-  {
-    Console.WriteLine("Assembling the ios build");
-  }
-
-  public override void Deploy()
-  {
-    Console.WriteLine("Deploying ios build to server");
-  }
-
-  public override void Lint()
-  {
-    Console.WriteLine("Linting the ios code");
-  }
-
-  public override void Test()
-  {
-    Console.WriteLine("Running ios tests");
-  }
-}
-
-```
-And then it can be used as
-
-```C#
-var androidBuilder = new AndroidBuilder();
-androidBuilder.Build();
-
-// Output:
-// Running android tests
-// Linting the android code
-// Assembling the android build
-// Deploying android build to server
-
-var iosBuilder = new IosBuilder();
-iosBuilder.Build();
-
-// Output:
-// Running ios tests
-// Linting the ios code
-// Assembling the ios build
-// Deploying ios build to server
-```
+### Check list
+1. Examine the algorithm, and decide which steps are standard and which steps are peculiar to each of the current classes.
+1. Define a new abstract base class to host the "don't call us, we'll call you" framework.
+1. Move the shell of the algorithm (now called the "template method") and the definition of all standard steps to the new base class.
+1. Define a placeholder or "hook" method in the base class for each step that requires many different implementations. This method can host a default implementation – or – it can be defined as abstract (Java) or pure virtual (C++).
+1. Invoke the hook method(s) from the template method.
+1. Each of the existing classes declares an "is-a" relationship to the new abstract base class.
+1. Remove from the existing classes all the implementation details that have been moved to the base class.
+1. The only details that will remain in the existing classes will be the implementation details peculiar to each derived class.
