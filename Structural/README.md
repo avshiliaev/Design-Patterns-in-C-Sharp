@@ -16,193 +16,203 @@ Wikipedia says
 
 🔌 Adapter
 -------
-Real world example
-> Imagine that you’re creating a stock market monitoring app. The app downloads the stock data from multiple sources in XML format and then displays nice-looking charts and diagrams for the user.
-> At some point, you decide to improve the app by integrating a smart 3rd-party analytics library. But there’s a catch: the analytics library only works with data in JSON format.
-> You could change the library to work with XML. However, this might break some existing code that relies on the library. And worse, you might not have access to the library’s source code in the first place, making this approach impossible.
+### Problem
+An "off the shelf" component offers compelling functionality that you would like to reuse, but its "view of the world" is not compatible with the philosophy and architecture of the system currently being developed.
 
-In plain words
-> An adapter wraps one of the objects to hide the complexity of conversion happening behind the scenes. 
+### Intent
+* Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn't otherwise because of incompatible interfaces.
+* Wrap an existing class with a new interface.
+* Impedance match an old component to a new system
 
-Wikipedia says
-> In software engineering, the adapter pattern is a software design pattern that allows the interface of an existing class to be used as another interface. It is often used to make existing classes work with others without modifying their source code.
+### Discussion
 
-When to use
-> Use the Adapter class when you want to use some existing class, but its interface isn’t compatible with the rest of your code.
-> Use the pattern when you want to reuse several existing subclasses that lack some common functionality that can’t be added to the superclass.
+Reuse has always been painful and elusive. One reason has been the tribulation of designing something new, while reusing something old. There is always something not quite right between the old and the new. It may be physical dimensions or misalignment. It may be timing or synchronization. It may be unfortunate assumptions or competing standards.
+
+It is like the problem of inserting a new three-prong electrical plug in an old two-prong wall outlet – some kind of adapter or intermediary is necessary.
+
+Adapter is about creating an intermediary abstraction that translates, or maps, the old component to the new system. Clients call methods on the Adapter object which redirects them into calls to the legacy component. This strategy can be implemented either with inheritance or with aggregation.
+
+Adapter functions as a wrapper or modifier of an existing class. It provides a different or translated view of that class.
+
+### Check list
+1. Identify the players: the component(s) that want to be accommodated (i.e. the client), and the component that needs to adapt (i.e. the adaptee).
+1. Identify the interface that the client requires.
+1. Design a "wrapper" class that can "impedance match" the adaptee to the client.
+1. The adapter/wrapper class "has a" instance of the adaptee class.
+1. The adapter/wrapper class "maps" the client interface to the adaptee interface.
+1. The client uses (is coupled to) the new interface
 
 🚡 Bridge
 ------
-Real world example
-> Consider you have a website with different pages and you are supposed to allow the user to change the theme. What would you do? Create multiple copies of each of the pages 
-> for each of the themes? Adding new shape types and colors to the hierarchy will grow it exponentially. Or would you just create separate theme and load them based on the 
-> user's preferences? Bridge pattern allows you to do the second i.e.
-> The Bridge pattern attempts to solve this problem by switching from inheritance to the object composition. What this means is that you extract one of the dimensions into 
-> a separate class hierarchy, so that the original classes will reference an object of the new hierarchy, instead of having all of its state and behaviors within one class.
+### Problem
+"Hardening of the software arteries" has occurred by using subclassing of an abstract base class to provide alternative implementations. This locks in compile-time binding between interface and implementation. The abstraction and implementation cannot be independently extended or composed.
 
-Abstraction and Implementation
+### Intent
+* Decouple an abstraction from its implementation so that the two can vary independently.
+* Publish interface in an inheritance hierarchy, and bury implementation in its own inheritance hierarchy.
+* Beyond encapsulation, to insulation
 
-> Abstraction (also called interface) is a high-level control layer for some entity. This layer isn’t supposed to do any real work on its own. It should delegate the work to the implementation layer (also called platform).
-> Let’s try to solve this issue with the Bridge pattern. It suggests that we divide the classes into two hierarchies: 
-> * Abstraction: the GUI layer of the app.
-> * Implementation: the operating systems’ APIs.
->
-> The abstraction object controls the appearance of the app, delegating the actual work to the linked implementation object. Different implementations are interchangeable as long as they follow a common interface, enabling the same GUI to work under Windows and Linux.
-> As a result, you can change the GUI classes without touching the API-related classes. Moreover, adding support for another operating system only requires creating a subclass in the implementation hierarchy.
+### Discussion
 
-When to use
+Decompose the component's interface and implementation into orthogonal class hierarchies. The interface class contains a pointer to the abstract implementation class. This pointer is initialized with an instance of a concrete implementation class, but all subsequent interaction from the interface class to the implementation class is limited to the abstraction maintained in the implementation base class. The client interacts with the interface class, and it in turn "delegates" all requests to the implementation class.
 
-> Use the Bridge pattern when you want to divide and organize a monolithic class that has several variants of some functionality (for example, if the class can work with various database servers).
-> Use the pattern when you need to extend a class in several orthogonal (independent) dimensions.
+The interface object is the "handle" known and used by the client; while the implementation object, or "body", is safely encapsulated to ensure that it may continue to evolve, or be entirely replaced (or shared at run-time.
 
-![With and without the bridge pattern](https://cloud.githubusercontent.com/assets/11269635/23065293/33b7aea0-f515-11e6-983f-98823c9845ee.png)
+Use the Bridge pattern when:
+* you want run-time binding of the implementation,
+* you have a proliferation of classes resulting from a coupled interface and numerous implementations,
+* you want to share an implementation among multiple objects,
+* you need to map orthogonal class hierarchies.
 
-In Plain Words
-> Bridge pattern is about preferring composition over inheritance. Implementation details are pushed from a hierarchy to another object with a separate hierarchy.
+Consequences include:
+* decoupling the object's interface,
+* improved extensibility (you can extend (i.e. subclass) the abstraction and implementation hierarchies independently),
+* hiding details from clients.
 
-Wikipedia says
-> The bridge pattern is a design pattern used in software engineering that is meant to "decouple an abstraction from its implementation so that the two can vary independently"
+Bridge is a synonym for the "handle/body" idiom. This is a design mechanism that encapsulates an implementation class inside of an interface class. The former is the body, and the latter is the handle. The handle is viewed by the user as the actual class, but the work is done in the body. "The handle/body class idiom may be used to decompose a complex abstraction into smaller, more manageable classes. The idiom may reflect the sharing of a single resource by multiple classes that control access to it (e.g. reference counting)."
 
+### Check list
+1. Decide if two orthogonal dimensions exist in the domain. These independent concepts could be: abstraction/platform, or domain/infrastructure, or front-end/back-end, or interface/implementation.
+1. Design the separation of concerns: what does the client want, and what do the platforms provide.
+1. Design a platform-oriented interface that is minimal, necessary, and sufficient. Its goal is to decouple the abstraction from the platform.
+1. Define a derived class of that interface for each platform.
+1. Create the abstraction base class that "has a" platform object and delegates the platform-oriented functionality to it.
+1. Define specializations of the abstraction class if desired.
 
 🌿 Composite
 -----------------
 
-Real world situtation
-> For example, imagine that you have two types of objects: Products and Boxes. A Box can contain several Products as well as a number of smaller Boxes. These little Boxes can also hold some Products or even smaller Boxes, and so on. 
-> Say you decide to create an ordering system that uses these classes. Orders could contain simple products without any wrapping, as well as boxes stuffed with products...and other boxes. How would you determine the total price of such an order?
-> An order might comprise various products, packaged in boxes, which are packaged in bigger boxes and so on. The whole structure looks like an upside down tree.
-> You have to know the classes of Products and Boxes you’re going through, the nesting level of the boxes and other nasty details beforehand. All of this makes the direct approach either too awkward or even impossible.
+### Problem
+Application needs to manipulate a hierarchical collection of "primitive" and "composite" objects. Processing of a primitive object is handled one way, and processing of a composite object is handled differently. Having to query the "type" of each object before attempting to process it is not desirable.
 
-Solution
-> The Composite pattern suggests that you work with Products and Boxes through a common interface which declares a method for calculating the total price. For a box, it’d go over each item the box contains, ask its price and then return a total for this box.
-> If one of these items were a smaller box, that box would also start going over its contents and so on, until the prices of all inner components were calculated.  
-> A box could even add some extra cost to the final price, such as packaging cost.
+### Intent
+* Compose objects into tree structures to represent whole-part hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.
+* Recursive composition
+* "Directories contain entries, each of which could be a directory."
+* 1-to-many "has a" up the "is a" hierarchy
 
-Benefit
-> The greatest benefit of this approach is that you don’t need to care about the concrete classes of objects that compose the tree. You don’t need to know whether an object is a simple product or a sophisticated box. You can treat them all the same via the common interface. When you call a method, the objects themselves pass the request down the tree.
-> The Container (aka composite) is an element that has sub-elements: leaves or other containers. A container doesn’t know the concrete classes of its children. It works with all sub-elements only via the component interface.  
-> Upon receiving a request, a container delegates the work to its sub-elements, processes intermediate results and then returns the final result to the client.
+### Discussion
+Define an abstract base class (Component) that specifies the behavior that needs to be exercised uniformly across all primitive and composite objects. Subclass the Primitive and Composite classes off of the Component class. Each Composite object "couples" itself only to the abstract type Component as it manages its "children".
 
+Use this pattern whenever you have "composites that contain components, each of which could be a composite".
 
-In plain words
-> Using the Composite pattern makes sense only when the core model of your app can be represented as a tree. 
-> The Composite pattern lets you run a behavior recursively over all components of an object tree.
+Child management methods [e.g. addChild(), removeChild()] should normally be defined in the Composite class. Unfortunately, the desire to treat Primitives and Composites uniformly requires that these methods be moved to the abstract Component class. See the "Opinions" section below for a discussion of "safety" versus "transparency" issues.
 
-Wikipedia says
-> In software engineering, the composite pattern is a partitioning design pattern. The composite pattern describes that a group of objects is to be treated in the same way as a single instance of an object. The intent of a composite is to "compose" objects into tree structures to represent part-whole hierarchies. Implementing the composite pattern lets clients treat individual objects and compositions uniformly.
+### Check list
+1. Ensure that your problem is about representing "whole-part" hierarchical relationships.
+1. Consider the heuristic, "Containers that contain containees, each of which could be a container." For example, "Assemblies that contain components, each of which could be an assembly." Divide your domain concepts into container classes, and containee classes.
+1. Create a "lowest common denominator" interface that makes your containers and containees interchangeable. It should specify the behavior that needs to be exercised uniformly across all containee and container objects.
+1. All container and containee classes declare an "is a" relationship to the interface.
+1. All container classes declare a one-to-many "has a" relationship to the interface.
+1. Container classes leverage polymorphism to delegate to their containee objects.
+1. Child management methods [e.g. addChild(), removeChild()] should normally be defined in the Composite class. Unfortunately, the desire to treat Leaf and Composite objects uniformly may require that these methods be promoted to the abstract Component class. See the Gang of Four for a discussion of these "safety" versus "transparency" trade-offs.
 
-When to use
-> Use the Composite pattern when you have to implement a tree-like object structure.
-> Use the pattern when you want the client code to treat both simple and complex elements uniformly.
 
 ☕ Decorator
 -------------
 
-Real world situtation
+### Problem
+You want to add behavior or state to individual objects at run-time. Inheritance is not feasible because it is static and applies to an entire class.
 
-> Imagine that you’re working on a notification library which lets other programs notify their users about important events. 
-> The initial version of the library was based on the Notifier class that had only a few fields, a constructor and a single send method. The method could accept a message argument from a client and send the message to a list of emails that were passed to the notifier via its constructor. A third-party app which acted as a client was supposed to create and configure the notifier object once, and then use it each time something important happened.
-> At some point, you realize that users of the library expect more than just email notifications. Many of them would like to receive an SMS about critical issues. Others would like to be notified on Facebook and, of course, the corporate users would love to get Slack notifications.
+### Intent
+* Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.
+* Client-specified embellishment of a core object by recursively wrapping it.
+* Wrapping a gift, putting it in a box, and wrapping the box.
 
-> How hard can that be? You extended the Notifier class and put the additional notification methods into new subclasses. Now the client was supposed to instantiate the desired notification class and use it for all further notifications.
-> But then someone reasonably asked you, “Why can’t you use several notification types at once? If your house is on fire, you’d probably want to be informed through every channel.”
-> You tried to address that problem by creating special subclasses which combined several notification methods within one class. However, it quickly became apparent that this approach would bloat the code immensely, not only the library code but the client code as well.  
+### Discussion
 
-Solution
+Suppose you are working on a user interface toolkit and you wish to support adding borders and scroll bars to windows. The Decorator pattern suggests giving the client the ability to specify whatever combination of "features" is desired.
 
-> Extending a class is the first thing that comes to mind when you need to alter an object’s behavior. However, inheritance has several serious caveats that you need to be aware of.
->   Inheritance is static. You can’t alter the behavior of an existing object at runtime. You can only replace the whole object with another one that’s created from a different subclass.
->   Subclasses can have just one parent class. In most languages, inheritance doesn’t let a class inherit behaviors of multiple classes at the same time.
-> Aggregation/composition is the key principle behind many design patterns, including Decorator. 
+The solution to this class of problems involves encapsulating the original object inside an abstract wrapper interface. Both the decorator objects and the core object inherit from this abstract interface. The interface uses recursive composition to allow an unlimited number of decorator "layers" to be added to each core object.
 
-> In our notifications example, let’s leave the simple email notification behavior inside the base Notifier class, but turn all other notification methods into decorators.
-> The client code would need to wrap a basic notifier object into a set of decorators that match the client’s preferences. The resulting objects will be structured as a stack.
-> The last decorator in the stack would be the object that the client actually works with.
-> Since all decorators implement the same interface as the base notifier, the rest of the client code won’t care whether it works with the “pure” notifier object or the decorated one.
+Note that this pattern allows responsibilities to be added to an object, not methods to an object's interface. The interface presented to the client must remain constant as successive layers are specified.
 
-In plain words
-> Decorator is a structural design pattern that lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+Also note that the core object's identity has now been "hidden" inside of a decorator object. Trying to access the core object directly is now a problem.
 
-Wikipedia says
-> In object-oriented programming, the decorator pattern is a design pattern that allows behavior to be added to an individual object, either statically or dynamically, without affecting the behavior of other objects from the same class. The decorator pattern is often useful for adhering to the Single Responsibility Principle, as it allows functionality to be divided between classes with unique areas of concern.
-
-When to use
-
-> Use the Decorator pattern when you need to be able to assign extra behaviors to objects at runtime without breaking the code that uses these objects.
-> Use the pattern when it’s awkward or not possible to extend an object’s behavior using inheritance.
+### Check list
+1. Ensure the context is: a single core (or non-optional) component, several optional embellishments or wrappers, and an interface that is common to all.
+1. Create a "Lowest Common Denominator" interface that makes all classes interchangeable.
+1. Create a second level base class (Decorator) to support the optional wrapper classes.
+1. The Core class and Decorator class inherit from the LCD interface.
+1. The Decorator class declares a composition relationship to the LCD interface, and this data member is initialized in its constructor.
+1. The Decorator class delegates to the LCD object.
+1. Define a Decorator derived class for each optional embellishment.
+1. Decorator derived classes implement their wrapper functionality - and - delegate to the Decorator base class.
+1. The client configures the type and ordering of Core and Decorator objects.
 
 📦 Facade
 ----------------
 
-Real world problem
-> Imagine that you must make your code work with a broad set of objects that belong to a sophisticated library or framework. Ordinarily, you’d need to initialize all of those objects, keep track of dependencies, execute methods in the correct order, and so on.
-> As a result, the business logic of your classes would become tightly coupled to the implementation details of 3rd-party classes, making it hard to comprehend and maintain.
+### Problem
+A segment of the client community needs a simplified interface to the overall functionality of a complex subsystem.
 
-Solution
-> A facade might provide limited functionality in comparison to working with the subsystem directly. However, it includes only those features that clients really care about. Having a facade is handy when you need to integrate your app with a sophisticated library that has dozens of features, but you just need a tiny bit of its functionality.
-> The Facade provides convenient access to a particular part of the subsystem’s functionality. It knows where to direct the client’s request and how to operate all the moving parts.
-> The Client uses the facade instead of calling the subsystem objects directly.
+### Intent
+* Provide a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.
+* Wrap a complicated subsystem with a simpler interface.
 
-In plain words
-> Facade is a structural design pattern that provides a simplified interface to a library, a framework, or any other complex set of classes.
- 
-Wikipedia says
-> A facade is an object that provides a simplified interface to a larger body of code, such as a class library.
+### Discussion
 
-When to use
+Facade discusses encapsulating a complex subsystem within a single interface object. This reduces the learning curve necessary to successfully leverage the subsystem. It also promotes decoupling the subsystem from its potentially many clients. On the other hand, if the Facade is the only access point for the subsystem, it will limit the features and flexibility that "power users" may need.
 
-> Use the Facade pattern when you need to have a limited but straightforward interface to a complex subsystem.
-> Use the Facade when you want to structure a subsystem into layers.
+**The Facade object should be a fairly simple advocate or facilitator. It should not become an all-knowing oracle or "god" object.**
+
+### Check list
+1. Identify a simpler, unified interface for the subsystem or component.
+1. Design a 'wrapper' class that encapsulates the subsystem.
+1. The facade/wrapper captures the complexity and collaborations of the component, and delegates to the appropriate methods.
+1. The client uses (is coupled to) the Facade only.
+1. Consider whether additional Facades would add value.
 
 🍃 Flyweight
 ---------
 
-Real world problem
-> To have some fun after long working hours, you decided to create a simple video game: players would be moving around a map and shooting each other. You chose to implement a realistic particle system and make it a distinctive feature of the game. Vast quantities of bullets, missiles, and shrapnel from explosions should fly all over the map and deliver a thrilling experience to the player.
-> The actual problem was related to your particle system. Each particle, such as a bullet, a missile or a piece of shrapnel was represented by a separate object containing plenty of data. At some point, when the carnage on a player’s screen reached its climax, newly created particles no longer fit into the remaining RAM, so the program crashed.
+### Problem
+Designing objects down to the lowest levels of system "granularity" provides optimal flexibility, but can be unacceptably expensive in terms of performance and memory usage.
 
-Solution
+### Intent
+* Use sharing to support large numbers of fine-grained objects efficiently.
+* The Motif GUI strategy of replacing heavy-weight widgets with light-weight gadgets.
 
-> On closer inspection of the Particle class, you may notice that the color and sprite fields consume a lot more memory than other fields. What’s worse is that these two fields store almost identical data across all particles. For example, all bullets have the same color and sprite.
-> Other parts of a particle’s state, such as coordinates, movement vector and speed, are unique to each particle. After all, the values of these fields change over time. This data represents the always changing context in which the particle exists, while the color and sprite remain constant for each particle.
-> This constant data of an object is usually called the intrinsic state. It lives within the object; other objects can only read it, not change it. The rest of the object’s state, often altered “from the outside” by other objects, is called the extrinsic state.
-> The Flyweight pattern suggests that you stop storing the extrinsic state inside the object. Instead, you should pass this state to specific methods which rely on it. Only the intrinsic state stays within the object, letting you reuse it in different contexts. As a result, you’d need fewer of these objects since they only differ in the intrinsic state, which has much fewer variations than the extrinsic.
-> Let’s return to our game. Assuming that we had extracted the extrinsic state from our particle class, only three different objects would suffice to represent all particles in the game: a bullet, a missile, and a piece of shrapnel. As you’ve probably guessed by now, an object that only stores the intrinsic state is called a flyweight.
-> Where does the extrinsic state move to? Some class should still store it, right? In most cases, it gets moved to the container object, which aggregates objects before we apply the pattern.
+### Discussion
+The Flyweight pattern describes how to share objects to allow their use at fine granularity without prohibitive cost. Each "flyweight" object is divided into two pieces: the state-dependent (extrinsic) part, and the state-independent (intrinsic) part. Intrinsic state is stored (shared) in the Flyweight object. Extrinsic state is stored or computed by client objects, and passed to the Flyweight when its operations are invoked.
 
-> ! Wait a second! Won’t we need to have as many of these contextual objects as we had at the very beginning? Technically, yes. But the thing is, these objects are much smaller than before. The most memory-consuming fields have been moved to just a few flyweight objects. Now, a thousand small contextual objects can reuse a single heavy flyweight object instead of storing a thousand copies of its data.
-> ! Since the same flyweight object can be used in different contexts, you have to make sure that its state can’t be modified. A flyweight should initialize its state just once, via constructor parameters. It shouldn’t expose any setters or public fields to other objects.
+An illustration of this approach would be Motif widgets that have been re-engineered as light-weight gadgets. Whereas widgets are "intelligent" enough to stand on their own; gadgets exist in a dependent relationship with their parent layout manager widget. Each layout manager provides context-dependent event handling, real estate management, and resource services to its flyweight gadgets, and each gadget is only responsible for context-independent state and behavior.
 
-
-In plain words
-> Flyweight is a structural design pattern that lets you fit more objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object.
-
-Wikipedia says
-> In computer programming, flyweight is a software design pattern. A flyweight is an object that minimizes memory use by sharing as much data as possible with other similar objects; it is a way to use objects in large numbers when a simple repeated representation would use an unacceptable amount of memory.
-
-When to use
->Use the Flyweight pattern only when your program must support a huge number of objects which barely fit into available RAM.
-
+### Check list
+1. Ensure that object overhead is an issue needing attention, and, the client of the class is able and willing to absorb responsibility realignment.
+1. Divide the target class's state into: shareable (intrinsic) state, and non-shareable (extrinsic) state.
+1. Remove the non-shareable state from the class attributes, and add it the calling argument list of affected methods.
+1. Create a Factory that can cache and reuse existing class instances.
+1. The client must use the Factory instead of the new operator to request objects.
+1. The client (or a third party) must look-up or compute the non-shareable state, and supply that state to class methods.
 
 🎱 Proxy
 -------------------
-Real world example
-> Why would you want to control access to an object? Here is an example: you have a massive object that consumes a vast amount of system resources. You need it from time to time, but not always.
-> You could implement lazy initialization: create this object only when it’s actually needed. All of the object’s clients would need to execute some deferred initialization code. Unfortunately, this would probably cause a lot of code duplication.
-  
-Solution
+### Problem
+You need to support resource-hungry objects, and you do not want to instantiate such objects unless and until they are actually requested by the client.
 
-> The Proxy pattern suggests that you create a new proxy class with the same interface as an original service object. Then you update your app so that it passes the proxy object to all of the original object’s clients. Upon receiving a request from a client, the proxy creates a real service object and delegates all the work to it.
-> But what’s the benefit? If you need to execute something either before or after the primary logic of the class, the proxy lets you do this without changing that class. Since the proxy implements the same interface as the original class, it can be passed to any client that expects a real service object.
+### Intent
+* Provide a surrogate or placeholder for another object to control access to it.
+* Use an extra level of indirection to support distributed, controlled, or intelligent access.
+* Add a wrapper and delegation to protect the real component from undue complexity.
 
-In plain words
-> Proxy is a structural design pattern that lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object.
+### Discussion
 
-Wikipedia says
-> A proxy, in its most general form, is a class functioning as an interface to something else. A proxy is a wrapper or agent object that is being called by the client to access the real serving object behind the scenes. Use of the proxy can simply be forwarding to the real object, or can provide additional logic. In the proxy extra functionality can be provided, for example caching when operations on the real object are resource intensive, or checking preconditions before operations on the real object are invoked.
+Design a surrogate, or proxy, object that: instantiates the real object the first time the client makes a request of the proxy, remembers the identity of this real object, and forwards the instigating request to this real object. Then all subsequent requests are simply forwarded directly to the encapsulated real object.
 
-When to use
+There are four common situations in which the Proxy pattern is applicable.
+1. A virtual proxy is a placeholder for "expensive to create" objects. The real object is only created when a client first requests/accesses the object.
+1. A remote proxy provides a local representative for an object that resides in a different address space. This is what the "stub" code in RPC and CORBA provides.
+1. A protective proxy controls access to a sensitive master object. The "surrogate" object checks that the caller has the access permissions required prior to forwarding the request.
+1. A smart proxy interposes additional actions when an object is accessed. Typical uses include:
+    * Counting the number of references to the real object so that it can be freed automatically when there are no more references (aka smart pointer),
+    * Loading a persistent object into memory when it's first referenced,
+    * Checking that the real object is locked before it is accessed to ensure that no other object can change it.
 
-> Lazy initialization (virtual proxy): Instead of creating a resource heavy object when the app launches, you can delay the object’s initialization to a time when it’s really needed.
-> Access control (protection proxy): The proxy can pass the request to the service object only if the client’s credentials match some criteria.
-> Caching request results (caching proxy): The proxy can implement caching for recurring requests that always yield the same results. The proxy may use the parameters of requests as the cache keys.
+### Check list
+1. Identify the leverage or "aspect" that is best implemented as a wrapper or surrogate.
+1. Define an interface that will make the proxy and the original component interchangeable.
+1. Consider defining a Factory that can encapsulate the decision of whether a proxy or original object is desirable.
+1. The wrapper class holds a pointer to the real class and implements the interface.
+1. The pointer may be initialized at construction, or on first use.
+1. Each wrapper method contributes its leverage, and delegates to the wrappee object.

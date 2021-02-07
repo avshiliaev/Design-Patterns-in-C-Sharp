@@ -1,4 +1,4 @@
-namespace Creational.Singleton
+namespace Creational.Singleton.Singletons
 {
     public class DataBaseConnection
     {
